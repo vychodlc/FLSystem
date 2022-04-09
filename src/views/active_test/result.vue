@@ -1,46 +1,75 @@
 <template>
   <div class="post-container">
-    <el-form>
+    <!-- <div style="height: 30px;">
+      <el-row align="middle" justify="center">
+        <el-col :span="2" style="text-align:center;line-height:30px">源探针</el-col>
+        <el-col :span="2"><el-input size="mini"></el-input></el-col>
+        <el-col :span="2" style="text-align:center;line-height:30px">目的地址</el-col>
+        <el-col :span="2"><el-input size="mini"></el-input></el-col>
+        <el-col :span="2" style="text-align:center;line-height:30px">开始时间</el-col>
+        <el-col :span="2"><el-input size="mini"></el-input></el-col>
+        <el-col :span="2" style="text-align:center;line-height:30px">结束时间</el-col>
+        <el-col :span="2"><el-input size="mini"></el-input></el-col>
+        <el-col>
+          <el-date-picker
+            v-model="queryData.start_time"
+            type="date"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-col>
+        <el-col :span="2" :offset="1"><el-button size="mini" type="" @click="goSearch">搜索</el-button></el-col>
+      </el-row>
+    </div> -->
+    <!-- <el-form style="border: 1px solid #000; height: 50px">
       <el-form-item>
         <el-row>
-          <el-col :span="1" style="text-align:center">源探针</el-col>
-          <el-col :span="2"><el-input size="small"></el-input></el-col>
-          <el-col :span="1" style="text-align:center">目的地址</el-col>
-          <el-col :span="2"><el-input size="small"></el-input></el-col>
-          <el-col :span="1" style="text-align:center">开始时间</el-col>
-          <el-col :span="2"><el-input size="small"></el-input></el-col>
-          <el-col :span="1" style="text-align:center">结束时间</el-col>
-          <el-col :span="2"><el-input size="small"></el-input></el-col>
-          <el-col :span="2" :offset="1"><el-button size="small" type="" @click="goSearch">搜索</el-button></el-col>
+          <el-col :span="2" style="text-align:center">源探针</el-col>
+          <el-col :span="2"><el-input size="mini"></el-input></el-col>
+          <el-col :span="2" style="text-align:center">目的地址</el-col>
+          <el-col :span="2"><el-input size="mini"></el-input></el-col>
+          <el-col :span="2" style="text-align:center">开始时间</el-col>
+          <el-col :span="2"><el-input size="mini"></el-input></el-col>
+          <el-col :span="2" style="text-align:center">结束时间</el-col>
+          <el-col :span="2"><el-input size="mini"></el-input></el-col>
+          <el-col :span="2" :offset="1"><el-button size="mini" type="" @click="goSearch">搜索</el-button></el-col>
         </el-row>
       </el-form-item>
-    </el-form>
-    <!-- <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
-      <el-option label="源探针" value="source"></el-option>
-      <el-option label="目的地址" value="target"></el-option>
+    </el-form> -->
+    <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
+      <el-option label="源探针" value="cpe_ip"></el-option>
+      <el-option label="目的地址" value="ser_ip"></el-option>
       <el-option label="开始时间" value="start_time"></el-option>
       <el-option label="结束时间" value="end_time"></el-option>
     </el-select>
-    <el-input placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
-    <el-button size="small" type="" @click="goSearch">搜索</el-button>
+    <template v-if="this.filter=='start_time' || this.filter=='end_time'">
+      <el-date-picker
+        v-model="search"
+        type="datetime"
+        placeholder="选择日期时间"
+        size="small"
+        style="width:30vw;margin-right:10px">
+      </el-date-picker>
+    </template>
+    <el-input v-else placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
+    <el-button size="small" type="" @click="currentPage=1;getData(1)">搜索</el-button>
     <el-button size="small" v-if="isSearch==true" type="primary" @click="goBack">返回</el-button>
-    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag> -->
+    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag>
     <el-table
       v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
-      <el-table-column label="源探针" prop="source"></el-table-column>
+      <el-table-column label="源探针" prop="cpe_ip"></el-table-column>
       <el-table-column label="测量业务" prop="business_name"></el-table-column>
-      <el-table-column label="测量工具" prop="performance"></el-table-column>
-      <el-table-column label="目的地址" prop="target"></el-table-column>
+      <el-table-column label="测量工具" prop="mea_type"></el-table-column>
+      <el-table-column label="目的地址" prop="ser_ip"></el-table-column>
       <el-table-column label="测量方式" prop="internal"></el-table-column>
-      <el-table-column label="测量时间" prop="test_time"></el-table-column>
-      <el-table-column label="状态" prop="status" width="100">
+      <el-table-column label="测量时间" prop="time"></el-table-column>
+      <el-table-column label="状态" prop="mea_status" width="100">
         <template slot-scope="scope">
-          <el-tag size="mini" v-if="scope.row.status==0" type="warning">异常</el-tag>
-          <el-tag size="mini" v-if="scope.row.status==1" type="success">完成</el-tag>
-          <el-tag size="mini" v-if="scope.row.status==2" type="info">等待</el-tag>
+          <el-tag size="mini" v-if="scope.row.mea_status=='异常'" type="warning">异常</el-tag>
+          <el-tag size="mini" v-if="scope.row.mea_status=='完成'" type="success">完成</el-tag>
+          <el-tag size="mini" v-if="scope.row.mea_status=='等待'" type="info">等待</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="right" width="200">
@@ -115,11 +144,11 @@
         <el-row :gutter="20">
           <el-col :span="6" :offset="6">
             <div style="width:100%;text-align:center">下行带宽</div>
-            <div style="width:100%;text-align:center">82728 kbps</div>
+            <div style="width:100%;text-align:center">{{bandwidth.receiver_bandwidth}} kbps</div>
           </el-col>
           <el-col :span="6">
             <div style="width:100%;text-align:center">上行带宽</div>
-            <div style="width:100%;text-align:center">82728 kbps</div>
+            <div style="width:100%;text-align:center">{{bandwidth.mea_sender_bandwidth}} kbps</div>
           </el-col>
         </el-row>
       </div>
@@ -137,16 +166,23 @@
 </template>
 
 <script>
-  import { getList } from '@/network/active_test.js'
+  import { getList,getFilterList,getDetail } from '@/network/active_test.js'
   export default {
     name: "Post",
     data () {
       return {
         search: null,
         searchWord: null,
-        filter: 'source',
+        filter: 'cpe_ip',
         filterWord: null,
         isSearch: false,
+        queryData: {
+          cpe_ip: '',
+          ser_ip: '',
+          start_time: '',
+          end_time: ''
+        },
+
         loading: true,
         tableData: [],
         tags: null,
@@ -156,64 +192,115 @@
         pageNum: 100,
         currentPage: 1,
         interpret: {
-          'source': {name:'源探针'},
-          'target': {name:'目的地址'},
+          'cpe_ip': {name:'源探针'},
+          'ser_ip': {name:'目的地址'},
           'start_time': {name:'开始时间'},
           'end_time': {name:'结束时间'}
         },
         dialogName: '',
+        bandwidth: {
+          mea_sender_bandwidth: 0,
+          receiver_bandwidth: 0
+        }
       }
     },
     mounted() {
-      // getList(1).then(res=>{
-      //   console.log(res);
-      // }).catch(e=>{
-      //   console.log(e);
-      // })
-      this.tableData = [
-        { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-        { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-        { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-        { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '2'},
-        { source: '1231', business_name: 'wqdqwd', performance: '4', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-        { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-      ];
+      this.getData(0,1)
+      // this.tableData = [
+      //   { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
+      //   { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
+      //   { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
+      //   { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '2'},
+      //   { source: '1231', business_name: 'wqdqwd', performance: '4', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
+      //   { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
+      // ];
       this.loading = false;
     },
     methods:{
-      filterChange() {},
-      goSearch() {},
-      goBack() {},
-      handleCurrentChange() {},
-      handleDelete(index, row) {},
-      
-      showDetail(row) {
-        this.dialogStatusVisible = true;
-        this.dialogName = row.performance;
-        if(row.performance=='1') {
-          this.dialogName = '时延测量';
-          this.$nextTick(() => {        
-            this.showChart1();
+      getData(method) {
+        if(method == 0) {
+          getList(this.currentPage).then(res=>{
+            this.pageNum = res.data.count;
+            this.tableData = res.data.items;
+            this.tableData.map(item=>{
+              let d = new Date(item.time);
+              item.time = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds(); 
+            })
+          }).catch(e=>{
+            console.log(e);
           })
-        } else if(row.performance=='2') {
-          this.dialogName = '流量测量';
-          this.$nextTick(() => {        
-            this.showChart2();
-          })
-        } else if(row.performance=='3') {
-          this.dialogName = '抖动测量';
-          this.$nextTick(() => {        
-            this.showChart3();
-          })
-        } else if(row.performance=='4') {
-          this.dialogName = '带宽测量';
-          this.$nextTick(() => {        
-            this.showChart4();
+        } else if(method == 1) {
+          let params = {
+            p: this.currentPage,
+            method: this.filter,
+            content: this.search
+          }
+          this.filterWord = this.interpret[this.filter].name;
+          this.searchWord = this.search;
+
+          if(params.method=='start_time' || params.method=='end_time') {
+            params.content = (new Date(params.content)).valueOf()/1000;
+            let d = new Date(params.content*1000);
+            this.searchWord = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+          }
+          getFilterList(params).then(res=>{
+            this.pageNum = res.data.count;
+            this.tableData = res.data.items;
+            this.isSearch = true;
+            this.tableData.map(item=>{
+              let d = new Date(item.time);
+              item.time = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds(); 
+            });
+          }).catch(e=>{
+            console.log(e);
           })
         }
       },
+      filterChange() {
+        this.search = ''
+      },
+      goSearch() {
+      },
+      goBack() {
+        this.currentPage = 1;
+        this.getData(0);
+        this.isSearch = false;
+        this.search = '';
+      },
+      handleCurrentChange() {
+        this.getData(this.isSearch?1:0)
+      },
+      handleDelete(index, row) {},
+      
+      showDetail(row) {
+        getDetail(row.mea_id).then(res=>{
+          this.dialogStatusVisible = true;
+          this.dialogName = row.mea_type;
+          if(row.mea_type=='delay') {
+            this.dialogName = '时延测量';
+            this.$nextTick(() => {
+              this.showChart1(res.data);
+            })
+          } else if(row.mea_type=='traffic') {
+            this.dialogName = '流量测量';
+            this.$nextTick(() => {        
+              this.showChart2(res.data);
+            })
+          } else if(row.mea_type=='jitter') {
+            this.dialogName = '抖动测量';
+            this.$nextTick(() => {        
+              this.showChart3(res.data);
+            })
+          } else if(row.mea_type=='bandwidth') {
+            this.dialogName = '带宽测量';
+            this.$nextTick(() => {        
+              this.showChart4(res.data);
+            })
+          }
+        })        
+      },
 
-      showChart1() {
+      showChart1(chartData) {
         let colorList = {
           good: ["#22C55E","#a9d8a9","#cee9ce"],
           error: ["#22C55E","#a9d8a9","#cee9ce"],
@@ -222,7 +309,7 @@
         let option_pie_1 = {
           title: {
               text: '良好',
-              subtext: '网络连通性',
+              subtext: '网络性能',
               left: 'center',
               top: 'center',
               textStyle: {
@@ -266,7 +353,7 @@
             }
           ]
         };
-        let value_loss = 70
+        let value_loss = chartData.loss;
         let option_pie_2 = {
           title: {
               text: value_loss+'%',
@@ -327,7 +414,7 @@
             }
           ]
         };
-        let value_delay = 0.49;
+        let value_delay = chartData.avg_delay;
         let option_pie_3 = {
           title: {
               text: value_delay+'ms',
@@ -388,7 +475,7 @@
             }
           ]
         };
-        let value_shake = 0.17;
+        let value_shake = chartData.jitter;
         let option_pie_4 = {
           backgroundColor: '#fff',
           graphic: [{
@@ -468,7 +555,7 @@
             }
           ]
         };
-        let data1 = ['101', '80', '58'];
+        let data1 = [chartData.max_delay, chartData.min_delay, chartData.avg_delay];
         let data2 = ['200', '100', '111'];
         let className = ['MAX', 'MIN', 'AVG'];
         let colorBar = ['#34accf', '#3188fd', '#12288e'];
@@ -482,7 +569,9 @@
             },
             xAxis: {
                 show: false,
-                type: 'value'
+                type: 'value',
+                max: chartData.max_delay*1.002,
+                min: chartData.min_delay*0.999,
             },
             yAxis: [{
                 type: 'category',
@@ -595,9 +684,9 @@
           this.$echarts.init(document.getElementById('echarts_1_line_2')).setOption(option_line);
         }
       },
-      showChart2() {
-        let data1 = ['101', '80', '58'];
-        let data2 = ['200', '100', '111'];
+      showChart2(chartData) {
+        let data1 = [chartData.max_input, chartData.min_input, chartData.avg_input];
+        let data2 = [chartData.max_output, chartData.min_output, chartData.avg_output];
         let className = ['max', 'min', 'avg'];
         let colorBar = ['#34accf', '#3188fd', '#12288e'];
         let option = {
@@ -679,7 +768,7 @@
           this.$echarts.init(document.getElementById('echarts_2_line_2')).setOption(option);
         } 
       },
-      showChart3() {
+      showChart3(chartData) {
         let colorList = {
           good: ["#22C55E","#a9d8a9","#cee9ce"],
           error: ["#22C55E","#a9d8a9","#cee9ce"],
@@ -688,7 +777,7 @@
         let option_pie_1 = {
           title: {
               text: '良好',
-              subtext: '网络连通性',
+              subtext: '网络性能',
               left: 'center',
               top: 'center',
               textStyle: {
@@ -732,7 +821,7 @@
             }
           ]
         };
-        let value_shake = 0.17;
+        let value_shake = chartData.jitter;
         let option_pie_2 = {
           backgroundColor: '#fff',
           graphic: [{
@@ -802,14 +891,15 @@
           this.$echarts.init(document.getElementById('echarts_3_pie_2')).setOption(option_pie_2);
         }
       },
-      showChart4() {
+      showChart4(chartData) {
+        this.bandwidth = chartData
         let option = {
           series: [{
             name: '带宽测量',
             type: 'gauge',
             radius: '100%',
             detail: {formatter:'{value} kbps'},
-            data: [{value: 120}],
+            data: [{value: chartData.mea_sender_bandwidth}],
             axisLine: {
               lineStyle: {
                 length: 18,
@@ -844,7 +934,7 @@
             document.getElementById(chartList[i]).removeAttribute("_echarts_instance_");
           }
         }
-      }
+      },
     }
   }
 </script>
