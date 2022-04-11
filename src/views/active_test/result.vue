@@ -148,7 +148,7 @@
           </el-col>
           <el-col :span="6">
             <div style="width:100%;text-align:center">上行带宽</div>
-            <div style="width:100%;text-align:center">{{bandwidth.mea_sender_bandwidth}} kbps</div>
+            <div style="width:100%;text-align:center">{{bandwidth.sender_bandwidth}} kbps</div>
           </el-col>
         </el-row>
       </div>
@@ -199,7 +199,7 @@
         },
         dialogName: '',
         bandwidth: {
-          mea_sender_bandwidth: 0,
+          sender_bandwidth: 0,
           receiver_bandwidth: 0
         }
       }
@@ -301,14 +301,23 @@
       },
 
       showChart1(chartData) {
-        let colorList = {
-          good: ["#22C55E","#a9d8a9","#cee9ce"],
-          error: ["#22C55E","#a9d8a9","#cee9ce"],
-          warning: ["#22C55E","#a9d8a9","#cee9ce"],
+        let colorList = [];
+        let status = '';
+        if(chartData.performance=='abnormal') {
+          colorList = ["#FDE047","#FEF08A","#FEF9C3"];
+          status = '异常';
+        } else {
+          colorList = ["#22C55E","#a9d8a9","#cee9ce"]
+          status = '良好';
         }
+        // let colorList = {
+        //   good: ["#22C55E","#a9d8a9","#cee9ce"],
+        //   error: ["#22C55E","#a9d8a9","#cee9ce"],
+        //   warning: ["#22C55E","#a9d8a9","#cee9ce"],
+        // }
         let option_pie_1 = {
           title: {
-              text: '良好',
+              text: status,
               subtext: '网络性能',
               left: 'center',
               top: 'center',
@@ -329,7 +338,7 @@
               silent: true,
               radius: ["0%", "60%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[0] }},
+              itemStyle: { normal: { color: colorList[0] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             },
@@ -338,7 +347,7 @@
               silent: true,
               radius: ["60%", "75%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[1] }},
+              itemStyle: { normal: { color: colorList[1] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             },
@@ -347,7 +356,7 @@
               silent: true, 
               radius: ["75%", "90%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[2] }},
+              itemStyle: { normal: { color: colorList[2] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             }
@@ -769,14 +778,23 @@
         } 
       },
       showChart3(chartData) {
-        let colorList = {
-          good: ["#22C55E","#a9d8a9","#cee9ce"],
-          error: ["#22C55E","#a9d8a9","#cee9ce"],
-          warning: ["#22C55E","#a9d8a9","#cee9ce"],
+        let colorList = [];
+        let status = '';
+        if(chartData.performance=='abnormal') {
+          colorList = ["#FDE047","#FEF08A","#FEF9C3"];
+          status = '异常';
+        } else {
+          colorList = ["#22C55E","#a9d8a9","#cee9ce"]
+          status = '良好';
         }
+        // let colorList = {
+        //   good: ["#22C55E","#a9d8a9","#cee9ce"],
+        //   error: ["#22C55E","#a9d8a9","#cee9ce"],
+        //   warning: ["#22C55E","#a9d8a9","#cee9ce"],
+        // }
         let option_pie_1 = {
           title: {
-              text: '良好',
+              text: status,
               subtext: '网络性能',
               left: 'center',
               top: 'center',
@@ -797,7 +815,7 @@
               silent: true,
               radius: ["0%", "60%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[0] }},
+              itemStyle: { normal: { color: colorList[0] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             },
@@ -806,7 +824,7 @@
               silent: true,
               radius: ["60%", "75%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[1] }},
+              itemStyle: { normal: { color: colorList[1] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             },
@@ -815,7 +833,7 @@
               silent: true, 
               radius: ["75%", "90%"],
               center: ["50%", "50%"],
-              itemStyle: { normal: { color: colorList.good[2] }},
+              itemStyle: { normal: { color: colorList[2] }},
               data: [{ value: 3235 }],
               label: {normal: {show: false}},
             }
@@ -899,7 +917,7 @@
             type: 'gauge',
             radius: '100%',
             detail: {formatter:'{value} kbps'},
-            data: [{value: chartData.mea_sender_bandwidth}],
+            data: [{value: chartData.sender_bandwidth}],
             axisLine: {
               lineStyle: {
                 length: 18,

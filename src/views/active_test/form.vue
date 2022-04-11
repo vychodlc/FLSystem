@@ -20,7 +20,12 @@
           <el-input v-model="filter.business_ser_ip"></el-input>
         </el-form-item>
         <el-form-item label="查询测量指标">
-          <el-input v-model="filter.measure_type"></el-input>
+          <template>
+            <el-radio v-model="filter.measure_type" label="bandwidth">带宽测量</el-radio>
+            <el-radio v-model="filter.measure_type" label="jitter">抖动测量</el-radio>
+            <el-radio v-model="filter.measure_type" label="delay">时延测量</el-radio>
+            <el-radio v-model="filter.measure_type" label="traffic">流量测量</el-radio>
+          </template>
         </el-form-item>
         <el-form-item label="开始时间">
           <el-date-picker
@@ -38,7 +43,7 @@
       <div class="chart">
         <el-row :gutter="20">
           <el-col :span="24">
-            <div v-if="hasRes==1" id="echarts" style="width: 100%; height: 45vh;border: 1px solid #f8a"></div>    
+            <div v-if="hasRes==1" id="echarts" style="width: 100%; height: 42vh;"></div>    
             <el-empty v-else-if="hasRes==0" description="查询无果"></el-empty>
           </el-col>
         </el-row>
@@ -84,54 +89,66 @@
         //   this.$message.error('请输入开始时间')
         } else {
           getForm(this.filter).then(res=>{
+            console.log(res);
             let name = '';
             let series = [];
             let resData = res.data;
-            if(this.filter.measure_type=='bandwidth') {
-              name = '带宽';
-              series = [
-                {type: 'bar', data: [resData.max_receiver_bandwidth,resData.avg_receiver_bandwidth,resData.min_receiver_bandwidth]},
-                {type: 'bar', data: [resData.max_sender_bandwidth,resData.avg_sender_bandwidth,resData.min_sender_bandwidth]},
-              ]
-            } else if(this.filter.measure_type=='delay') {
-              name = '时延';
-              series = [
-                {type: 'bar', data: [resData.max_delay,resData.avg_delay,resData.min_delay]},
-              ]
-            } else if(this.filter.measure_type=='jitter') {
-              name = '抖动';
-              series = [
-                {type: 'bar', data: [resData.max_network_jitter,resData.avg_network_jitter,resData.min_network_jitter]},
-              ]
-            } else if(this.filter.measure_type=='traffic') {
-              name = '流量';
-              series = [
-                {type: 'bar', data: [resData.max_input,resData.avg_input,resData.min_input]},
-                {type: 'bar', data: [resData.max_output,resData.avg_output,resData.min_output]},
-              ]
+            if(typeof resData == "string") {
+              console.log(123);
+              resData = resData.replace(/Infinity/g, '0');
+              resData = JSON.parse(resData);
             }
-            this.$nextTick(() => {
-              let option = {
-                xAxis: {
-                  type: 'category',
-                  data: ['最大'+name, '平均'+name, '最小'+name]
-                },
-                yAxis: {
-                  type: 'value'
-                },
-                grid: {
-                  top: '5%',
-                  left: '5%',
-                  bottom: '5%',
-                  right: '0%'
-                },
-                series: series
-              };
-              if(document.getElementById('echarts')!=null) {
-                document.getElementById('echarts').removeAttribute("_echarts_instance_");
-                this.$echarts.init(document.getElementById('echarts')).setOption(option);
-              } 
-            })
+            console.log(typeof resData);
+            if(resData.count==0) {     
+              this.hasRes = 0;
+            } else {
+              this.hasRes = 1;
+              if(this.filter.measure_type=='bandwidth') {
+                name = '带宽';
+                series = [
+                  {type: 'bar', data: [resData.max_receiver_bandwidth,resData.avg_receiver_bandwidth,resData.min_receiver_bandwidth]},
+                  {type: 'bar', data: [resData.max_sender_bandwidth,resData.avg_sender_bandwidth,resData.min_sender_bandwidth]},
+                ]
+              } else if(this.filter.measure_type=='delay') {
+                name = '时延';
+                series = [
+                  {type: 'bar', data: [resData.max_delay,resData.avg_delay,resData.min_delay]},
+                ]
+              } else if(this.filter.measure_type=='jitter') {
+                name = '抖动';
+                series = [
+                  {type: 'bar', data: [resData.max_network_jitter,resData.avg_network_jitter,resData.min_network_jitter]},
+                ]
+              } else if(this.filter.measure_type=='traffic') {
+                name = '流量';
+                series = [
+                  {type: 'bar', data: [resData.max_input,resData.avg_input,resData.min_input]},
+                  {type: 'bar', data: [resData.max_output,resData.avg_output,resData.min_output]},
+                ]
+              }
+              this.$nextTick(() => {
+                let option = {
+                  xAxis: {
+                    type: 'category',
+                    data: ['最大'+name, '平均'+name, '最小'+name]
+                  },
+                  yAxis: {
+                    type: 'value'
+                  },
+                  grid: {
+                    top: '5%',
+                    left: '5%',
+                    bottom: '6%',
+                    right: '0%'
+                  },
+                  series: series
+                };
+                if(document.getElementById('echarts')!=null) {
+                  document.getElementById('echarts').removeAttribute("_echarts_instance_");
+                  this.$echarts.init(document.getElementById('echarts')).setOption(option);
+                } 
+              })
+            }
           }).catch(e=>{
             console.log(e);
           })

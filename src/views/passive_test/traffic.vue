@@ -12,33 +12,55 @@
     </el-row>
     <el-row>
       <el-col :span="12" :offset="11">
-        <el-button type="primary">刷新</el-button>
+        <el-button type="primary" @click="refreshBtn" :disabled="disable">{{btnText}}</el-button>
       </el-col>
     </el-row>
   </div>
 </template>
 <script>
+import {overview} from '@/network/traffic.js'
 export default({
   name: '',
   data() {
     return {
-
+      resData: null,
+      cooling: 5,
+      disable: false,
+      btnText: '刷新',
     };
   },
   mounted() {
-    this.showChart();
+    this.getData();
   },
   methods: {
-    showChart() {
+    getData() {
+      overview().then(res=>{
+        // console.log(res);
+        if(res.statusText=='OK') {
+          this.resData = res.data;
+          let data_traffic = [[],[]];
+          res.data.traffic_total.map(item=>{
+            data_traffic[0].push(item[0]);
+            data_traffic[1].push(item[1]);
+          })
+          let data_business = [[],[]];
+          res.data.business.map(item=>{
+            data_business[0].push(item[0]);
+            data_business[1].push(item[1]);
+          })
+          this.showChart(data_traffic,data_business);
+        }
+      }).catch(e=>{
+        console.log(e);
+      })
+    },
+    showChart(data_traffic,data_business) {
       let option_line = {
         title: {
           text: '流量概况'
         },
         tooltip: {
           trigger: 'axis'
-        },
-        legend: {
-          data: ['Email', 'Union Ads']
         },
         grid: {
           left: '3%',
@@ -49,7 +71,7 @@ export default({
         xAxis: {
           type: 'category',
           boundaryGap: false,
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: data_traffic[0]
         },
         yAxis: {
           type: 'value'
@@ -59,26 +81,20 @@ export default({
             name: 'Email',
             type: 'line',
             stack: 'Total',
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: 'Union Ads',
-            type: 'line',
-            stack: 'Total',
-            data: [220, 182, 191, 234, 290, 330, 310]
+            data: data_traffic[1]
           }
         ]
       };
       let option_bar = {
         title: {
-          text: '业务分析（Top10）'
+          text: '业务分析 (Top10)'
         },
         tooltip: {
           trigger: 'axis'
         },
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: data_business[0]
         },
         grid: {
           left: '3%',
@@ -92,7 +108,7 @@ export default({
         },
         series: [
           {
-            data: [120, 200, 150, 80, 70, 110, 130],
+            data: data_business[1],
             type: 'bar'
           }
         ]
@@ -113,6 +129,21 @@ export default({
           document.getElementById(chartList[i]).removeAttribute("_echarts_instance_");
         }
       }
+    },
+    refreshBtn() {
+      this.disable = true;
+      this.getData();
+      let countDown =  setInterval(() => {
+        if (this.cooling < 1) {
+          this.disable = false
+          this.btnText = '刷新'
+          this.cooling = 5
+          clearInterval(countDown)
+        } else {
+          this.disable = true
+          this.btnText = this.cooling-- + 's后可刷新'
+        }
+      }, 1000)
     }
   },
 });
