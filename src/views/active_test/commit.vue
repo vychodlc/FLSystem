@@ -11,18 +11,44 @@
           </template>
         </el-form-item>
         <el-form-item label="测量业务">
-          <el-input v-model="inputInfo.business_name"></el-input>
+          <el-select 
+          @change='businessChecked()'
+          v-model="inputInfo.business_name" style="width:80%" clearable placeholder="请选择测量业务">
+            <el-option
+              size="medium"
+              v-for="item in businessList"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="源探针">
-          <el-input v-model="inputInfo.cpe_ip"></el-input>
+          <el-select v-model="inputInfo.cpe_ip" :disabled='cpe_ip_list.length==0'  style="width:80%" placeholder="请选择源探针">
+            <el-option
+              size="medium"
+              v-for="item in cpe_ip_list"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="目的地址">
-          <el-input v-model="inputInfo.business_ser_ip"></el-input>
+          <el-select v-model="inputInfo.business_ser_ip" :disabled='business_ser_ip_list.length==0' style="width:80%" placeholder="请选择目的地址">
+            <el-option
+              size="medium"
+              v-for="item in business_ser_ip_list"
+              :key="item"
+              :label="item"
+              :value="item">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="测量周期">
           <template>
             <el-row>
-              <el-col :span="4"><el-input v-model="inputInfo.interval"></el-input></el-col>
+              <el-col :span="4"><el-input v-model="inputInfo.interval" size="medium"></el-input></el-col>
               <el-col :span="2" :offset="1"><el-radio v-model="inputInfo.interval" label="0">立即</el-radio></el-col>
               <el-col :span="2"><el-radio v-model="inputInfo.interval" label="300">5分钟</el-radio></el-col>
               <el-col :span="2"><el-radio v-model="inputInfo.interval" label="600">10分钟</el-radio></el-col>
@@ -45,7 +71,7 @@
         </el-upload>
       </div>
       <el-table
-        height='300'
+        height='250'
         style="width: 100%;overflow:hidden;"
         :row-style="{height: '30px'}"
         :data="newItems">
@@ -64,14 +90,14 @@
         </el-table-column>
       </el-table>
       <div class="footer" style="margin-top:20px">
-        <el-button type="primary" :disabled='newItems.length==0' @click="goCommit" size="medium">确 定</el-button>
+        <el-button type="primary" :disabled='newItems.length==0' @click="goCommit" size="mini">确 定</el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-  import {sendTask} from '@/network/active_test.js'
+  import {sendTask,getBusinessList,getIPList} from '@/network/active_test.js'
   var XLSX = require("xlsx");
   export default {
     name: "Input",
@@ -86,6 +112,9 @@
           business_ser_ip: '',
           interval: '',
         },
+        businessList: [],
+        cpe_ip_list: [],
+        business_ser_ip_list: [],
         loading: true,
         newItems: [],
         fileList: [],
@@ -93,6 +122,22 @@
       }
     },
     methods:{
+      businessChecked() {
+        if(this.inputInfo.business_name=='') {
+          this.cpe_ip_list = [];
+          this.business_ser_ip_list = [];
+          this.inputInfo.cpe_ip = '';
+          this.inputInfo.business_ser_ip = '';
+        } else {
+          getIPList(this.inputInfo.business_name).then(res=>{
+            this.cpe_ip_list = res.data.cpe_ips;
+            this.business_ser_ip_list = res.data.business_ser_ips;
+            
+            this.inputInfo.cpe_ip = this.cpe_ip_list[0];
+            this.inputInfo.business_ser_ip = this.business_ser_ip_list[0];
+          })
+        }        
+      },
       goAdd() {
         if(this.inputInfo.measure_type=='') {
           this.$message.error('请选择测量工具')
@@ -110,6 +155,8 @@
           let newItem = this.inputInfo;
           newItem.measure_type = this.measure_typeList[parseInt(newItem.measure_type)]
           this.newItems.push(newItem);
+          this.cpe_ip_list = [];
+          this.business_ser_ip_list = [];
           this.inputInfo = {
             measure_type: '',
             business_name: '',
@@ -160,7 +207,8 @@
       goCommit() {
         let newItems = this.newItems
         this.newItems = [];
-        sendTask(newItems).then(res=>{
+        let string = JSON.stringify(newItems);
+        sendTask(string).then(res=>{
           if(res.data == 'request success') {
             this.$message({
               message: '测试任务下发成功',
@@ -171,7 +219,10 @@
       }
     },
     mounted() {
-      this.loading = false;
+      getBusinessList().then(res=>{
+        this.businessList = res.data;
+        this.loading = false;
+      })
       this.newItems = []
     }
   }

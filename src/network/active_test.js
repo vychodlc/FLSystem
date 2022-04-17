@@ -1,8 +1,8 @@
 import { request } from "./request";
 
-export function sendTask(list) {
+export function sendTask(string) {
   let formData = new FormData();
-  formData.append('data',list)
+  formData.append('data',string)
   return request({
     method: 'POST',
     url: '/measure/measure',
@@ -32,18 +32,28 @@ export function getDetail(id) {
 }
 
 export function getForm(params) {
-  console.log(params);
-  // params.time = (new Date(params.time)).valueOf()/1000;
-  params = {
-    cycle: params.cycle,
-    business_name: '视频监控业务',
-    cpe_ip: '10.112.15.59',
-    business_ser_ip: '127.0.0.1',
-    measure_type: params.measure_type,
-    start_time: 1648602829
-  }
   return request({
     url: '/measure/statistics',
-    params
+    params: {
+      cycle: params.cycle,
+      business_name: params.business_name,
+      cpe_ip: params.cpe_ip,
+      business_ser_ip: params.business_ser_ip,
+      measure_type: params.measure_type,
+      start_time: (new Date(params.time)).valueOf()/1000
+    }
+  })
+}
+
+export function getBusinessList() {
+  return request({
+    url: '/measure/list_business',
+  })
+}
+
+export function getIPList(business_name) {
+  return request({
+    url: '/measure/list_ip',
+    params: {business_name: business_name}
   })
 }

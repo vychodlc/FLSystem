@@ -1,64 +1,65 @@
 <template>
   <div class="post-container">
-    <!-- <div style="height: 30px;">
-      <el-row align="middle" justify="center">
-        <el-col :span="2" style="text-align:center;line-height:30px">源探针</el-col>
-        <el-col :span="2"><el-input size="mini"></el-input></el-col>
-        <el-col :span="2" style="text-align:center;line-height:30px">目的地址</el-col>
-        <el-col :span="2"><el-input size="mini"></el-input></el-col>
-        <el-col :span="2" style="text-align:center;line-height:30px">开始时间</el-col>
-        <el-col :span="2"><el-input size="mini"></el-input></el-col>
-        <el-col :span="2" style="text-align:center;line-height:30px">结束时间</el-col>
-        <el-col :span="2"><el-input size="mini"></el-input></el-col>
-        <el-col>
-          <el-date-picker
-            v-model="queryData.start_time"
-            type="date"
-            placeholder="选择日期">
-          </el-date-picker>
-        </el-col>
-        <el-col :span="2" :offset="1"><el-button size="mini" type="" @click="goSearch">搜索</el-button></el-col>
-      </el-row>
-    </div> -->
-    <!-- <el-form style="border: 1px solid #000; height: 50px">
+    <el-form style="height: 30px;line-height:30px">
       <el-form-item>
         <el-row>
-          <el-col :span="2" style="text-align:center">源探针</el-col>
-          <el-col :span="2"><el-input size="mini"></el-input></el-col>
-          <el-col :span="2" style="text-align:center">目的地址</el-col>
-          <el-col :span="2"><el-input size="mini"></el-input></el-col>
-          <el-col :span="2" style="text-align:center">开始时间</el-col>
-          <el-col :span="2"><el-input size="mini"></el-input></el-col>
-          <el-col :span="2" style="text-align:center">结束时间</el-col>
-          <el-col :span="2"><el-input size="mini"></el-input></el-col>
-          <el-col :span="2" :offset="1"><el-button size="mini" type="" @click="goSearch">搜索</el-button></el-col>
+          <el-col :span="1" style="text-align:center">源探针</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.cpe_ip" clearable placeholder="请选择">
+              <el-option
+                v-for="item in cpe_ip_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">目的地址</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.ser_ip" clearable placeholder="请选择">
+              <el-option
+                v-for="item in business_ser_ip_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">开始时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.start_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1" style="text-align:center">结束时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.end_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1"><el-button size="mini" type="" @click="currentPage=1;getData(1)">搜索</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:5px" @click="goBack">返回</el-button></el-col>
         </el-row>
       </el-form-item>
-    </el-form> -->
-    <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
-      <el-option label="源探针" value="cpe_ip"></el-option>
-      <el-option label="目的地址" value="ser_ip"></el-option>
-      <el-option label="开始时间" value="start_time"></el-option>
-      <el-option label="结束时间" value="end_time"></el-option>
-    </el-select>
-    <template v-if="this.filter=='start_time' || this.filter=='end_time'">
-      <el-date-picker
-        v-model="search"
-        type="datetime"
-        placeholder="选择日期时间"
-        size="small"
-        style="width:30vw;margin-right:10px">
-      </el-date-picker>
-    </template>
-    <el-input v-else placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
-    <el-button size="small" type="" @click="currentPage=1;getData(1)">搜索</el-button>
-    <el-button size="small" v-if="isSearch==true" type="primary" @click="goBack">返回</el-button>
-    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag>
+    </el-form>
     <el-table
       v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
+      <el-table-column label="测量序号" prop="mea_id"></el-table-column>
       <el-table-column label="源探针" prop="cpe_ip"></el-table-column>
       <el-table-column label="测量业务" prop="business_name"></el-table-column>
       <el-table-column label="测量工具" prop="mea_type"></el-table-column>
@@ -75,6 +76,7 @@
       <el-table-column label="操作" align="right" width="200">
         <template slot-scope="scope">
           <el-button
+            v-if='scope.row.mea_status=="完成"'
             size="mini"
             @click="showDetail(scope.row)">查看</el-button>
           <el-button
@@ -83,7 +85,6 @@
             @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
-      <!-- <div id="echarts_box" style="width: 40vw; height: 30vh;position:absolute;top:0;left:0;z-index:-100;opacity:1"></div> -->
     </el-table>
     <el-dialog :title="dialogName" :visible.sync="dialogStatusVisible" :modal-append-to-body="false">
       <div v-if="dialogName=='时延测量'">
@@ -166,7 +167,7 @@
 </template>
 
 <script>
-  import { getList,getFilterList,getDetail } from '@/network/active_test.js'
+  import { getList,getFilterList,getDetail,getIPList } from '@/network/active_test.js'
   export default {
     name: "Post",
     data () {
@@ -201,20 +202,24 @@
         bandwidth: {
           sender_bandwidth: 0,
           receiver_bandwidth: 0
+        },
+        cpe_ip_list: [],
+        business_ser_ip_list: [],
+        startPickerOptions: {
+          disabledDate: (time) => {
+            return (new Date(time)).valueOf() > (new Date()).valueOf();
+          }
         }
       }
     },
     mounted() {
-      this.getData(0,1)
-      // this.tableData = [
-      //   { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-      //   { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-      //   { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-      //   { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '2'},
-      //   { source: '1231', business_name: 'wqdqwd', performance: '4', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-      //   { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-      // ];
-      this.loading = false;
+      this.currentPage = 1;
+      this.getData(0);
+      getIPList('').then(res=>{
+        this.cpe_ip_list = res.data.cpe_ips;
+        this.business_ser_ip_list = res.data.business_ser_ips;
+        this.loading = false;
+      })
     },
     methods:{
       getData(method) {
@@ -224,42 +229,38 @@
             this.tableData = res.data.items;
             this.tableData.map(item=>{
               let d = new Date(item.time);
-              item.time = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds(); 
+              item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')
             })
           }).catch(e=>{
             console.log(e);
           })
         } else if(method == 1) {
           let params = {
-            p: this.currentPage,
-            method: this.filter,
-            content: this.search
+            cpe_ip: this.queryData.cpe_ip,
+            ser_ip: this.queryData.ser_ip,
+            start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
+            end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
+            p: this.currentPage
           }
-          this.filterWord = this.interpret[this.filter].name;
-          this.searchWord = this.search;
-
-          if(params.method=='start_time' || params.method=='end_time') {
-            params.content = (new Date(params.content)).valueOf()/1000;
-            let d = new Date(params.content*1000);
-            this.searchWord = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+          if(params.start_time>params.end_time) {
+            this.$message.error('请确保开始时间早于当前时间')
+          } else {
+            getFilterList(params).then(res=>{
+              this.pageNum = res.data.count;
+              this.tableData = res.data.items;
+              this.isSearch = true;
+              this.tableData.map(item=>{
+                let d = new Date(item.time);
+                item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')  
+              });
+            }).catch(e=>{
+              console.log(e);
+            })
           }
-          getFilterList(params).then(res=>{
-            this.pageNum = res.data.count;
-            this.tableData = res.data.items;
-            this.isSearch = true;
-            this.tableData.map(item=>{
-              let d = new Date(item.time);
-              item.time = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds(); 
-            });
-          }).catch(e=>{
-            console.log(e);
-          })
         }
       },
       filterChange() {
         this.search = ''
-      },
-      goSearch() {
       },
       goBack() {
         this.currentPage = 1;
@@ -310,11 +311,6 @@
           colorList = ["#22C55E","#a9d8a9","#cee9ce"]
           status = '良好';
         }
-        // let colorList = {
-        //   good: ["#22C55E","#a9d8a9","#cee9ce"],
-        //   error: ["#22C55E","#a9d8a9","#cee9ce"],
-        //   warning: ["#22C55E","#a9d8a9","#cee9ce"],
-        // }
         let option_pie_1 = {
           title: {
               text: status,
@@ -787,11 +783,6 @@
           colorList = ["#22C55E","#a9d8a9","#cee9ce"]
           status = '良好';
         }
-        // let colorList = {
-        //   good: ["#22C55E","#a9d8a9","#cee9ce"],
-        //   error: ["#22C55E","#a9d8a9","#cee9ce"],
-        //   warning: ["#22C55E","#a9d8a9","#cee9ce"],
-        // }
         let option_pie_1 = {
           title: {
               text: status,
@@ -956,7 +947,11 @@
     }
   }
 </script>
-
+<style>
+  .el-main {
+    padding: 10px 20px;
+  }
+</style>
 <style scoped>
   .post-container {
     position: relative;
@@ -965,32 +960,4 @@
     position: absolute;
     right: 20px;
   }
-
-
-  /* .el-row {
-    margin-bottom: 20px;
-  }
-  .el-row:last-child {
-    margin-bottom: 0;
-  }
-  .el-col {
-    border-radius: 4px;
-  }
-  .bg-purple-dark {
-    background: #99a9bf;
-  }
-  .bg-purple {
-    background: #d3dce6;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
-  } */
 </style>
