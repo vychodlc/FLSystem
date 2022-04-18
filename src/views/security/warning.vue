@@ -1,31 +1,70 @@
 <template>
   <div class="post-container">
-    <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
-      <el-option label="MAC地址" value="source"></el-option>
-      <el-option label="IP地址" value="target"></el-option>
-      <el-option label="开始时间" value="start_time"></el-option>
-      <el-option label="结束时间" value="end_time"></el-option>
-    </el-select>
-    <el-input placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
-    <el-button size="small" type="" @click="goSearch">搜索</el-button>
-    <el-button size="small" v-if="isSearch==true" type="primary" @click="goBack">返回</el-button>
-    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag>
+    <el-form style="height: 30px;line-height:30px">
+      <el-form-item>
+        <el-row>
+          <el-col :span="1" style="text-align:center">MAC地址</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.macAddress" clearable placeholder="请选择">
+              <el-option
+                v-for="item in macAddress_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">IP地址</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.ipAddress" clearable placeholder="请选择">
+              <el-option
+                v-for="item in ipAddress_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">开始时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.start_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              style="width:100%"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1" style="text-align:center">结束时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.end_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              style="width:100%"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1"><el-button size="mini" type="" style="margin-left:5px" @click="currentPage=1;getData(1)">搜索</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:10px" @click="goBack">返回</el-button></el-col>
+        </el-row>
+      </el-form-item>
+    </el-form>
     <el-table
       v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
-      <el-table-column label="告警时间" prop="source"></el-table-column>
-      <el-table-column label="MAC地址" prop="business_name"></el-table-column>
-      <el-table-column label="告警IP" prop="performance"></el-table-column>
-      <el-table-column label="告警描述" prop="target"></el-table-column>
-      <!-- <el-table-column label="操作" align="center">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="showDetail(scope.row)">查看</el-button>
-        </template>
-      </el-table-column> -->
+      <el-table-column label="告警时间" prop="warningTime"></el-table-column>
+      <el-table-column label="MAC地址" prop="macAddress"></el-table-column>
+      <el-table-column label="告警IP" prop="ipAddress"></el-table-column>
+      <el-table-column label="告警描述" prop="warningDetail"></el-table-column>
     </el-table>
     <el-dialog :title="dialogName" :visible.sync="dialogStatusVisible" :modal-append-to-body="false">
       123123
@@ -43,6 +82,7 @@
 </template>
 
 <script>
+  import { getWarningList } from '@/network/security.js'
   export default {
     name: "Post",
     data () {
@@ -58,7 +98,7 @@
         dialogStatusVisible: false,
         dialogStatus: null,
         oldPost: null,
-        pageNum: 100,
+        pageNum: 1,
         currentPage: 1,
         interpret: {
           'source': {name:'MAC地址'},
@@ -67,42 +107,69 @@
           'end_time': {name:'结束时间'}
         },
         dialogName: '',
+        queryData: {
+          interval: '',
+          macAddress: '',
+          ipAddress: '',
+          start_time: '',
+          end_time: '',
+        },
+        macAddress_list: [],
+        ipAddress_list: [],
+        startPickerOptions: {
+          disabledDate: (time) => {
+            return (new Date(time)).valueOf() > (new Date()).valueOf();
+          }
+        }
       }
     },
     mounted() {
-      this.tableData = [
-        { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-        { source: '1231', business_name: 'wqdqwd', performance: '1', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-        { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-        { source: '1231', business_name: 'wqdqwd', performance: '2', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '2'},
-        { source: '1231', business_name: 'wqdqwd', performance: '4', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
-        { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
-      ];
-      this.loading = false;
+      this.currentPage = 1;
+      this.loading = true;
+      this.getData(0);
     },
     methods:{
+      getData(method) {
+        if(method == 0) {
+          getWarningList(this.currentPage).then(res=>{
+            console.log(res);
+            this.pageNum = res.data.count;
+            this.tableData = res.data.data;
+            this.loading = false;
+          }).catch(e=>{
+            console.log(e);
+          })
+        } else if(method == 1) {
+          console.log('搜索还没做好');
+        }
+      },
       filterChange() {},
       goSearch() {},
-      goBack() {},
-      handleCurrentChange() {},
+      goBack() {
+        this.currentPage = 1;
+        this.loading = true;
+        this.getData(0);
+        this.isSearch = false;
+        this.search = '';
+      },
+      handleCurrentChange() {
+        this.loading = true;
+        this.getData(this.isSearch?1:0)
+      },
       handleDelete(index, row) {},
       
       showDetail(row) {
-        this.dialogStatusVisible = true;
-        this.dialogName = row.performance;
-        if(row.performance=='1') {
-          this.dialogName = '时延测量';
-        } else if(row.performance=='2') {
-          this.dialogName = '流量测量';
-        } else if(row.performance=='3') {
-          this.dialogName = '抖动测量';
-        } else if(row.performance=='4') {
-          this.dialogName = '带宽测量';
-        }
+        console.log(row);
       },
     }
   }
 </script>
+
+<style>
+  .el-main {
+    padding: 10px 20px;
+  }
+</style>
 
 <style scoped>
   .post-container {
@@ -111,34 +178,5 @@
   .pagination {
     position: absolute;
     right: 20px;
-  }
-
-
-  .el-row {
-    margin-bottom: 20px;
-  }
-  .el-row:last-child {
-    margin-bottom: 0;
-  }
-  .el-col {
-    border-radius: 4px;
-    /* border: 1px solid #000; */
-  }
-  .bg-purple-dark {
-    background: #99a9bf;
-  }
-  .bg-purple {
-    background: #d3dce6;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
-  }
-  .grid-content {
-    border-radius: 4px;
-    min-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
   }
 </style>

@@ -69,7 +69,7 @@
       <div class="chart">
         <el-row :gutter="20">
           <el-col :span="24">
-            <div v-if="hasRes==1" id="echarts" style="width: 100%; height: 42vh;"></div>    
+            <div v-if="hasRes==1" id="echarts" style="width: 50%; margin: 0 auto; height: 42vh;"></div>    
             <el-empty v-else-if="hasRes==0" description="查询无果"></el-empty>
           </el-col>
         </el-row>
@@ -151,12 +151,12 @@
               } else if(this.filter.measure_type=='delay') {
                 name = '时延';
                 series = [
-                  {type: 'bar', data: [resData.max_delay,resData.avg_delay,resData.min_delay]},
+                  {type: 'bar', barWidth: '30%', data: [resData.max_delay,resData.avg_delay,resData.min_delay]},
                 ]
               } else if(this.filter.measure_type=='jitter') {
                 name = '抖动';
                 series = [
-                  {type: 'bar', data: [resData.max_network_jitter,resData.avg_network_jitter,resData.min_network_jitter]},
+                  {type: 'bar', barWidth: '30%', data: [resData.max_network_jitter,resData.avg_network_jitter,resData.min_network_jitter]},
                 ]
               } else if(this.filter.measure_type=='traffic') {
                 name = '流量';

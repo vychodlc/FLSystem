@@ -1,6 +1,66 @@
 <template>
   <div class="post-container">
-    <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
+    <el-form style="height: 30px;line-height:30px">
+      <el-form-item>
+        <el-row>
+          <el-col :span="1" style="text-align:center">统计周期</el-col>
+          <el-col :span="1">
+            <el-input size="mini" v-model="queryData.Interval" placeholder="10"></el-input>
+          </el-col>
+          <el-col :span="1" style="text-align:center">源探针</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.cpe_ip" clearable placeholder="请选择">
+              <el-option
+                v-for="item in cpe_ip_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">目的地址</el-col>
+          <el-col :span="2">
+            <el-select 
+            size="mini"
+            v-model="queryData.ser_ip" clearable placeholder="请选择">
+              <el-option
+                v-for="item in business_ser_ip_list"
+                :key="item"
+                :label="item"
+                :value="item">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="1" style="text-align:center">开始时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.start_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              style="width:100%"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1" style="text-align:center">结束时间</el-col>
+          <el-col :span="4">
+            <el-date-picker
+              v-model="queryData.end_time"
+              :picker-options="startPickerOptions"
+              type="datetime"
+              style="width:100%"
+              placeholder="选择日期时间"
+              size="mini">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="1"><el-button size="mini" type="" style="margin-left:5px" @click="currentPage=1;getData(1)">搜索</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:5px" @click="goBack">返回</el-button></el-col>
+        </el-row>
+      </el-form-item>
+    </el-form>
+    <!-- <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
       <el-option label="源探针" value="source"></el-option>
       <el-option label="目的地址" value="target"></el-option>
       <el-option label="开始时间" value="start_time"></el-option>
@@ -9,7 +69,7 @@
     <el-input placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
     <el-button size="small" type="" @click="goSearch">搜索</el-button>
     <el-button size="small" v-if="isSearch==true" type="primary" @click="goBack">返回</el-button>
-    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag>
+    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag> -->
     <el-table
       v-loading="loading"
       :data="tableData"
@@ -52,6 +112,7 @@
 </template>
 
 <script>
+  import { getIPList } from '@/network/active_test.js'
   export default {
     name: "Post",
     data () {
@@ -76,6 +137,20 @@
           'end_time': {name:'结束时间'}
         },
         dialogName: '',
+        queryData: {
+          interval: '',
+          cpe_ip: '',
+          ser_ip: '',
+          start_time: '',
+          end_time: '',
+        },
+        cpe_ip_list: [],
+        business_ser_ip_list: [],
+        startPickerOptions: {
+          disabledDate: (time) => {
+            return (new Date(time)).valueOf() > (new Date()).valueOf();
+          }
+        }
       }
     },
     mounted() {
@@ -87,8 +162,15 @@
         { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '0'},
         { source: '1231', business_name: 'wqdqwd', performance: '3', target: 'qwdqwdqwqvvv', internal: 'qwdqw222e', test_time: 'qwd2e2e2', status: '1'},
       ];
-      this.loading = false;
-      this.showChart1();
+
+      this.currentPage = 1;
+      getIPList('').then(res=>{
+        this.cpe_ip_list = res.data.cpe_ips;
+        this.business_ser_ip_list = res.data.business_ser_ips;
+        this.loading = true;
+        this.getData(0);
+        this.showChart1();
+      })
     },
     methods:{
       filterChange() {},
@@ -96,7 +178,14 @@
       goBack() {},
       handleCurrentChange() {},
       handleDelete(index, row) {},
-      
+      getData(method) {
+        if(method==0) {
+          console.log('0000+++'+this.currentPage);
+        } else if(method==1) {
+          console.log('1111+++'+this.currentPage);
+        }
+        this.loading = false;
+      },
       showDetail(row) {
         this.dialogStatusVisible = true;
         this.dialogName = row.performance;
@@ -146,6 +235,12 @@
     }
   }
 </script>
+
+<style>
+  .el-main {
+    padding: 10px 20px;
+  }
+</style>
 
 <style scoped>
   .post-container {

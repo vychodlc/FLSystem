@@ -35,6 +35,7 @@ export default({
   methods: {
     getData() {
       overview().then(res=>{
+        console.log(res);
         if(res.statusText=='OK') {
           this.resData = res.data;
           let data_traffic = [[],[]];

@@ -13,19 +13,19 @@ module.exports = defineConfig({
       }
     }
   },
-  devServer: {
-    port: 8080,
-    open: true,
-    proxy: {
-      '/api': {
-        target: "http://10.112.15.59:33060/",
-        changeOrigin: true,
-        ws: true,
-        pathRewrite: {
-          '^/api': '/'
-        }
-      }
-    },
-  },
-  publicPath: './'
+  // devServer: {
+  //   port: 8080,
+  //   open: true,
+  //   proxy: {
+  //     '/api': {
+  //       target: "http://10.112.15.59:33060/",
+  //       changeOrigin: true,
+  //       ws: true,
+  //       pathRewrite: {
+  //         '^/api': '/'
+  //       }
+  //     }
+  //   },
+  // },
+  // publicPath: './'
 })

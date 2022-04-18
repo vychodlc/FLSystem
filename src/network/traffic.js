@@ -5,3 +5,17 @@ export function overview() {
     url: '/traffic/overview',
   })
 }
+
+export function performance(params) {
+  return request({
+    url: '/traffic/performance',
+    params
+  })
+}
+
+export function rate(params) {
+  return request({
+    url: '/traffic/rate',
+    params
+  })
+}

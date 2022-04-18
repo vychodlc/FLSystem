@@ -35,6 +35,7 @@
               v-model="queryData.start_time"
               :picker-options="startPickerOptions"
               type="datetime"
+              style="width:100%"
               placeholder="选择日期时间"
               size="mini">
             </el-date-picker>
@@ -45,21 +46,21 @@
               v-model="queryData.end_time"
               :picker-options="startPickerOptions"
               type="datetime"
+              style="width:100%"
               placeholder="选择日期时间"
               size="mini">
             </el-date-picker>
           </el-col>
-          <el-col :span="1"><el-button size="mini" type="" @click="currentPage=1;getData(1)">搜索</el-button></el-col>
-          <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:5px" @click="goBack">返回</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" type="" style="margin-left:5px" @click="currentPage=1;loading=true;getData(1)">搜索</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:10px" @click="goBack">返回</el-button></el-col>
         </el-row>
       </el-form-item>
     </el-form>
     <el-table
       v-loading="loading"
       :data="tableData"
-      style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
+      style="width: 100%;height: calc(100vh - 145px);overflow-y:scroll"
       class="elTable">
-      <el-table-column label="测量序号" prop="mea_id"></el-table-column>
       <el-table-column label="源探针" prop="cpe_ip"></el-table-column>
       <el-table-column label="测量业务" prop="business_name"></el-table-column>
       <el-table-column label="测量工具" prop="mea_type"></el-table-column>
@@ -214,11 +215,11 @@
     },
     mounted() {
       this.currentPage = 1;
-      this.getData(0);
+      this.loading = true;
       getIPList('').then(res=>{
         this.cpe_ip_list = res.data.cpe_ips;
         this.business_ser_ip_list = res.data.business_ser_ips;
-        this.loading = false;
+        this.getData(0);
       })
     },
     methods:{
@@ -264,6 +265,7 @@
       },
       goBack() {
         this.currentPage = 1;
+        this.loading = true;
         this.getData(0);
         this.isSearch = false;
         this.search = '';

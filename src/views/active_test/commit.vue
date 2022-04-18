@@ -4,10 +4,10 @@
       <el-form label-width="150px" size="medium">
         <el-form-item label="测量工具">
           <template>
-            <el-radio v-model="inputInfo.measure_type" label="1">时延测量</el-radio>
-            <el-radio v-model="inputInfo.measure_type" label="2">流量测量</el-radio>
-            <el-radio v-model="inputInfo.measure_type" label="3">抖动测量</el-radio>
-            <el-radio v-model="inputInfo.measure_type" label="4">带宽测量</el-radio>
+            <el-radio v-model="inputInfo.measure_type" label="0">时延测量</el-radio>
+            <el-radio v-model="inputInfo.measure_type" label="1">流量测量</el-radio>
+            <el-radio v-model="inputInfo.measure_type" label="2">抖动测量</el-radio>
+            <el-radio v-model="inputInfo.measure_type" label="3">带宽测量</el-radio>
           </template>
         </el-form-item>
         <el-form-item label="测量业务">
