@@ -34,3 +34,15 @@ export function block(params) {
     params
   })
 }
+
+export function deviceDropList() {
+  return request({
+    url: '/safety/list_device_ipsmacs'
+  })
+}
+
+export function wariningDropList() {
+  return request({
+    url: '/safety/list_warning_ipsmacs'
+  })
+}

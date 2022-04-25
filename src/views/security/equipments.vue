@@ -75,8 +75,15 @@
       <el-table-column label="SIM卡ICCID信息" prop="iccid"></el-table-column>
       <el-table-column label="电信业务端口" prop="businessPort"></el-table-column>
       <el-table-column label="设备注册时间" prop="registrationTime"></el-table-column>
-      <!-- <el-table-column label="设备流量阻隔" prop="test_time"></el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="设备流量阻隔" prop="blockStatus">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.blockStatus"
+            @change="blockChange(scope.row)">
+          </el-switch>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column label="操作" align="center">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -100,7 +107,7 @@
 </template>
 
 <script>
-  import { getDeviceList,queryDevice } from '@/network/security.js'
+  import { getDeviceList,queryDevice,block,deviceDropList } from '@/network/security.js'
   export default {
     name: "Post",
     data () {
@@ -143,12 +150,11 @@
     mounted() {
       this.currentPage = 1;
       this.loading = true;
-      // getIPList('').then(res=>{
-      //   this.ip_list = res.data.ips;
-      //   this.mac_list = res.data.macs;
-      //   this.getData(0);
-      // })
-      this.getData(0)
+      deviceDropList('').then(res=>{
+        this.ip_list = res.data.ips;
+        this.mac_list = res.data.macs;
+        this.getData(0);
+      })
     },
     methods:{
       getData(method) {
@@ -156,30 +162,36 @@
           getDeviceList(this.currentPage).then(res=>{
             this.pageNum = res.data.count;
             this.tableData = res.data.data;
+            this.tableData.map(item => item.blockStatus=='ACCEPT');
             this.loading = false;
           }).catch(e=>{
             console.log(e);
           })
         } else if(method == 1) {
-          let params = {
-            mac: this.queryData.mac,
-            ip: this.queryData.ip,
-            start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
-            end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
-            p: this.currentPage
-          }
-          if(params.start_time>params.end_time) {
-            this.$message.error('请确保开始时间早于当前时间')
+          if(this.queryData.mac==''&&this.queryData.ip==''&&this.queryData.start_time==''&&this.queryData.end_time=='') {
+            this.$message.error('请输入搜索信息');
+            this.loading = false;
           } else {
-            queryDevice(params).then(res=>{
-              console.log(res);
-              this.pageNum = res.data.count;
-              this.tableData = res.data.data;
-              this.isSearch = true;
-              this.loading = false;
-            }).catch(e=>{
-              console.log(e);
-            })
+            let params = {
+              mac: this.queryData.mac,
+              ip: this.queryData.ip,
+              start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
+              end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
+              p: this.currentPage
+            }
+            if(params.start_time>params.end_time) {
+              this.$message.error('请确保开始时间早于当前时间')
+            } else {
+              queryDevice(params).then(res=>{
+                console.log(res);
+                this.pageNum = res.data.count;
+                this.tableData = res.data.data;
+                this.isSearch = true;
+                this.loading = false;
+              }).catch(e=>{
+                console.log(e);
+              })
+            }
           }
         }
       },
@@ -201,6 +213,26 @@
       showDetail(row) {
         console.log(row);
       },
+      blockChange(row) {
+        let params = {
+          ip: row.ipAddress,
+          mac: row.macAddress,
+          block_action: row.blockStatus?'DROP':'ACCEPT',
+        };
+        let oldStatus = row.blockStatus;
+        block(params).then(res=>{
+          let status = res.data.request_status;
+          let text1 = row.blockStatus?'阻隔':'连通';
+          let text2 = res.data.block_status=='ACCEPT'?'连通':'阻隔';
+          let text3 = res.data.request_status=='0'?'不好意思阻隔失败咯！':'恭喜你！阻隔成功啦！';
+          this.$alert(
+            '用户请求修改为：'+text1+' <br/>'+'当前阻隔状态：'+text2+' <br/>'+'详情：'+text3+' <br/>',
+            '阻隔切换结果', 
+            {confirmButtonText: '确定', dangerouslyUseHTMLString: true}
+          );
+          row.blockStatus = status=='0'?(!oldStatus):(oldStatus)
+        })
+      }
     }
   }
 </script>

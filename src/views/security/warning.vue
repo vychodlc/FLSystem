@@ -7,9 +7,9 @@
           <el-col :span="2">
             <el-select 
             size="mini"
-            v-model="queryData.macAddress" clearable placeholder="请选择">
+            v-model="queryData.mac" clearable placeholder="请选择">
               <el-option
-                v-for="item in macAddress_list"
+                v-for="item in mac_list"
                 :key="item"
                 :label="item"
                 :value="item">
@@ -20,9 +20,9 @@
           <el-col :span="2">
             <el-select 
             size="mini"
-            v-model="queryData.ipAddress" clearable placeholder="请选择">
+            v-model="queryData.ip" clearable placeholder="请选择">
               <el-option
-                v-for="item in ipAddress_list"
+                v-for="item in ip_list"
                 :key="item"
                 :label="item"
                 :value="item">
@@ -62,8 +62,8 @@
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
       <el-table-column label="告警时间" prop="warningTime"></el-table-column>
-      <el-table-column label="MAC地址" prop="macAddress"></el-table-column>
-      <el-table-column label="告警IP" prop="ipAddress"></el-table-column>
+      <el-table-column label="MAC地址" prop="mac"></el-table-column>
+      <el-table-column label="告警IP" prop="ip"></el-table-column>
       <el-table-column label="告警描述" prop="warningDetail"></el-table-column>
     </el-table>
     <el-dialog :title="dialogName" :visible.sync="dialogStatusVisible" :modal-append-to-body="false">
@@ -82,7 +82,7 @@
 </template>
 
 <script>
-  import { getWarningList } from '@/network/security.js'
+  import { getWarningList, queryWarning, wariningDropList } from '@/network/security.js'
   export default {
     name: "Post",
     data () {
@@ -109,13 +109,13 @@
         dialogName: '',
         queryData: {
           interval: '',
-          macAddress: '',
-          ipAddress: '',
+          mac: '',
+          ip: '',
           start_time: '',
           end_time: '',
         },
-        macAddress_list: [],
-        ipAddress_list: [],
+        mac_list: [],
+        ip_list: [],
         startPickerOptions: {
           disabledDate: (time) => {
             return (new Date(time)).valueOf() > (new Date()).valueOf();
@@ -126,7 +126,11 @@
     mounted() {
       this.currentPage = 1;
       this.loading = true;
-      this.getData(0);
+      wariningDropList('').then(res=>{
+        this.ip_list = res.data.ips;
+        this.mac_list = res.data.macs;
+        this.getData(0);
+      })
     },
     methods:{
       getData(method) {
@@ -138,9 +142,34 @@
             this.loading = false;
           }).catch(e=>{
             console.log(e);
+            this.$message.error('请联系后端询问服务器是否出现问题')
           })
         } else if(method == 1) {
-          console.log('搜索还没做好');
+          if(this.queryData.mac==''&&this.queryData.ip==''&&this.queryData.start_time==''&&this.queryData.end_time=='') {
+            this.$message.error('请输入搜索信息');
+            this.loading = false;
+          } else {
+            let params = {
+              mac: this.queryData.mac,
+              ip: this.queryData.ip,
+              start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
+              end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
+              p: this.currentPage
+            }
+            if(params.start_time>params.end_time) {
+              this.$message.error('请确保开始时间早于当前时间')
+            } else {
+              queryWarning(params).then(res=>{
+                console.log(res);
+                this.pageNum = res.data.count;
+                this.tableData = res.data.data;
+                this.isSearch = true;
+                this.loading = false;
+              }).catch(e=>{
+                console.log(e);
+              })
+            }
+          }
         }
       },
       filterChange() {},
