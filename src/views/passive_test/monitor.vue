@@ -1,5 +1,5 @@
 <template>
-  <div class="post-container">
+  <div class="post-container" v-loading="loading">
     <el-form style="height: 30px;line-height:30px">
       <el-form-item>
         <el-row>
@@ -60,18 +60,7 @@
         </el-row>
       </el-form-item>
     </el-form>
-    <!-- <el-select v-model="filter" size="small" @change='filterChange' style="width:8vw;margin-right:10px" placeholder="请选择">
-      <el-option label="源探针" value="source"></el-option>
-      <el-option label="目的地址" value="target"></el-option>
-      <el-option label="开始时间" value="start_time"></el-option>
-      <el-option label="结束时间" value="end_time"></el-option>
-    </el-select>
-    <el-input placeholder="请输入内容" size="small" style="width:30vw;margin-right:10px" v-model="search" class="input-with-select"></el-input>
-    <el-button size="small" type="" @click="goSearch">搜索</el-button>
-    <el-button size="small" v-if="isSearch==true" type="primary" @click="goBack">返回</el-button>
-    <el-tag size="small" closable v-if="isSearch==true" style="margin-left:10px" @close="goBack">{{filterWord}} : {{searchWord}}</el-tag> -->
     <el-table
-      v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
@@ -81,11 +70,11 @@
       <el-table-column label="优先级" prop="target"></el-table-column>
       <el-table-column label="源地址" prop="internal"></el-table-column>
       <el-table-column label="目的地址" prop="test_time"></el-table-column>
-      <el-table-column label="平均时延" prop="internal"></el-table-column>
+      <el-table-column label="平均时延" prop="avg_delay"></el-table-column>
       <el-table-column label="占比" prop="test_time"></el-table-column>
       <el-table-column label="流量" prop="internal"></el-table-column>
       <el-table-column label="占比" prop="test_time"></el-table-column>
-      <el-table-column label="总流量" prop="internal"></el-table-column>
+      <el-table-column label="总流量" prop="business_flow"></el-table-column>
       <el-table-column label="目的地址" prop="test_time"></el-table-column>
       <el-table-column label="速率趋势图" align="right">
         <template slot-scope="scope">
@@ -127,15 +116,8 @@
         tags: null,
         dialogStatusVisible: false,
         dialogStatus: null,
-        oldPost: null,
         pageNum: 100,
         currentPage: 1,
-        interpret: {
-          'source': {name:'源探针'},
-          'target': {name:'目的地址'},
-          'start_time': {name:'开始时间'},
-          'end_time': {name:'结束时间'}
-        },
         dialogName: '',
         queryData: {
           interval: '',
@@ -177,7 +159,6 @@
       goSearch() {},
       goBack() {},
       handleCurrentChange() {},
-      handleDelete(index, row) {},
       getData(method) {
         if(method==0) {
           console.log('0000+++'+this.currentPage);

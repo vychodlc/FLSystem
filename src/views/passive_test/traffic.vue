@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-loading='loading'>
     <el-row :gutter="20">
       <el-col :span="24">
         <div id="echarts_line" style="width: 100%; height: 36vh;margin-bottom:5vh"></div>
@@ -23,6 +23,7 @@ export default({
   name: '',
   data() {
     return {
+      loading: true,
       resData: null,
       cooling: 5,
       disable: false,
@@ -35,7 +36,6 @@ export default({
   methods: {
     getData() {
       overview().then(res=>{
-        console.log(res);
         if(res.statusText=='OK') {
           this.resData = res.data;
           let data_traffic = [[],[]];
@@ -49,6 +49,7 @@ export default({
             data_business[1].push(item[1]);
           })
           this.showChart(data_traffic,data_business);
+          this.loading = false;
         }
       }).catch(e=>{
         console.log(e);
@@ -132,6 +133,7 @@ export default({
     },
     refreshBtn() {
       this.disable = true;
+      this.loading = true;
       this.getData();
       let countDown =  setInterval(() => {
         if (this.cooling < 1) {

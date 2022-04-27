@@ -133,6 +133,7 @@
         } else if(this.filter.time=='') {
           this.$message.error('请输入开始时间')
         } else {
+          this.loading = true;
           getForm(this.filter).then(res=>{
             let name = '';
             let series = [];
@@ -193,7 +194,8 @@
                   this.$echarts.init(document.getElementById('echarts')).setOption(option);
                 } 
               })
-            }
+            }          
+          this.loading = false;
           }).catch(e=>{
             console.log(e);
           })
@@ -203,6 +205,7 @@
       },
     },
     mounted() {
+      this.loading = true;
       getBusinessList().then(res=>{
         this.businessList = res.data;
         this.loading = false;

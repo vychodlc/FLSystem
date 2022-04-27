@@ -1,5 +1,5 @@
 <template>
-  <div class="post-container">
+  <div class="post-container" v-loading="loading">
     <el-form style="height: 30px;line-height:30px">
       <el-form-item>
         <el-row>
@@ -57,7 +57,6 @@
       </el-form-item>
     </el-form>
     <el-table
-      v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 145px);overflow-y:scroll"
       class="elTable">
@@ -168,7 +167,7 @@
 </template>
 
 <script>
-  import { getList,getFilterList,getDetail,getIPList } from '@/network/active_test.js'
+  import { getList,getFilterList,getDetail,getIPList,deleteItem } from '@/network/active_test.js'
   export default {
     name: "Post",
     data () {
@@ -231,32 +230,40 @@
             this.tableData.map(item=>{
               let d = new Date(item.time);
               item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')
-            })
+            });
+            this.loading = false;
           }).catch(e=>{
             console.log(e);
           })
         } else if(method == 1) {
-          let params = {
-            cpe_ip: this.queryData.cpe_ip,
-            ser_ip: this.queryData.ser_ip,
-            start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
-            end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
-            p: this.currentPage
-          }
-          if(params.start_time>params.end_time) {
-            this.$message.error('请确保开始时间早于当前时间')
+          if(this.queryData.cpe_ip==''&&this.queryData.ser_ip==''&&this.queryData.start_time==''&&this.queryData.end_time=='') {
+            this.$message.error('请确保输入检索信息')
+            this.loading = false;
           } else {
-            getFilterList(params).then(res=>{
-              this.pageNum = res.data.count;
-              this.tableData = res.data.items;
-              this.isSearch = true;
-              this.tableData.map(item=>{
-                let d = new Date(item.time);
-                item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')  
-              });
-            }).catch(e=>{
-              console.log(e);
-            })
+            let params = {
+              cpe_ip: this.queryData.cpe_ip,
+              ser_ip: this.queryData.ser_ip,
+              start_time: this.queryData.start_time==''?0:parseInt((new Date(this.queryData.start_time)).valueOf()/1000),
+              end_time: this.queryData.end_time==''?parseInt((new Date()).valueOf()/1000):parseInt((new Date(this.queryData.end_time)).valueOf()/1000),
+              p: this.currentPage
+            }
+            if(params.start_time>params.end_time) {
+              this.$message.error('请确保开始时间早于当前时间')
+              this.loading = false;
+            } else {
+              getFilterList(params).then(res=>{
+                this.pageNum = res.data.count;
+                this.tableData = res.data.items;
+                this.isSearch = true;
+                this.tableData.map(item=>{
+                  let d = new Date(item.time);
+                  item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')  
+                });
+                this.loading = false;
+              }).catch(e=>{
+                console.log(e);
+              })
+            }
           }
         }
       },
@@ -264,16 +271,46 @@
         this.search = ''
       },
       goBack() {
+        this.queryData = {
+          cpe_ip: '',
+          ser_ip: '',
+          start_time: '',
+          end_time: ''
+        };
         this.currentPage = 1;
         this.loading = true;
         this.getData(0);
         this.isSearch = false;
         this.search = '';
       },
-      handleCurrentChange() {
+      handleCurrentChange() {      
+        this.loading = true;
         this.getData(this.isSearch?1:0)
       },
-      handleDelete(index, row) {},
+      handleDelete(index, row) {
+        this.$confirm('此操作将永久删除该测试结果, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.loading = true;
+          deleteItem(row.mea_id).then(res => {
+            if(res.data=="delete_measure success!") {
+              this.$message.success('测量结果删除成功')
+              this.loading = true;
+              this.getData(this.isSearch?1:0)
+            } else {
+              this.$message.error('测量结果删除失败')
+            }
+            this.loading = false;
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+      },
       
       showDetail(row) {
         getDetail(row.mea_id).then(res=>{

@@ -1,5 +1,5 @@
 <template>
-  <div class="post-container">
+  <div class="post-container" v-loading="loading">
     <el-form style="height: 30px;line-height:30px">
       <el-form-item>
         <el-row>
@@ -57,7 +57,6 @@
       </el-form-item>
     </el-form>
     <el-table
-      v-loading="loading"
       :data="tableData"
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
@@ -83,13 +82,6 @@
           </el-switch>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="操作" align="center">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            @click="showDetail(scope.row)">查看</el-button>
-        </template>
-      </el-table-column> -->
     </el-table>
     <el-dialog :title="dialogName" :visible.sync="dialogStatusVisible" :modal-append-to-body="false">
       123123
@@ -125,12 +117,6 @@
         oldPost: null,
         pageNum: 1,
         currentPage: 1,
-        interpret: {
-          'source': {name:'MAC地址'},
-          'target': {name:'IP地址'},
-          'start_time': {name:'开始时间'},
-          'end_time': {name:'结束时间'}
-        },
         dialogName: '',
         queryData: {
           mac: '',
@@ -183,7 +169,6 @@
               this.$message.error('请确保开始时间早于当前时间')
             } else {
               queryDevice(params).then(res=>{
-                console.log(res);
                 this.pageNum = res.data.count;
                 this.tableData = res.data.data;
                 this.isSearch = true;
@@ -198,6 +183,12 @@
       filterChange() {},
       goSearch() {},
       goBack() {
+        this.queryData = {
+          mac: '',
+          ip: '',
+          start_time: '',
+          end_time: '',
+        };
         this.currentPage = 1;
         this.loading = true;
         this.getData(0);
@@ -209,11 +200,8 @@
         this.getData(this.isSearch?1:0)
       },
       handleDelete(index, row) {},
-      
-      showDetail(row) {
-        console.log(row);
-      },
       blockChange(row) {
+        this.loading = true;
         let params = {
           ip: row.ipAddress,
           mac: row.macAddress,
@@ -225,12 +213,13 @@
           let text1 = row.blockStatus?'阻隔':'连通';
           let text2 = res.data.block_status=='ACCEPT'?'连通':'阻隔';
           let text3 = res.data.request_status=='0'?'不好意思阻隔失败咯！':'恭喜你！阻隔成功啦！';
+          this.loading = false;
           this.$alert(
             '用户请求修改为：'+text1+' <br/>'+'当前阻隔状态：'+text2+' <br/>'+'详情：'+text3+' <br/>',
             '阻隔切换结果', 
             {confirmButtonText: '确定', dangerouslyUseHTMLString: true}
           );
-          row.blockStatus = status=='0'?(!oldStatus):(oldStatus)
+          row.blockStatus = status=='0'?(!oldStatus):(oldStatus);
         })
       }
     }

@@ -51,7 +51,7 @@
               size="mini">
             </el-date-picker>
           </el-col>
-          <el-col :span="1"><el-button size="mini" type="" style="margin-left:5px" @click="currentPage=1;getData(1)">搜索</el-button></el-col>
+          <el-col :span="1"><el-button size="mini" type="" style="margin-left:5px" @click="currentPage=1;loading=true;getData(1)">搜索</el-button></el-col>
           <el-col :span="1"><el-button size="mini" v-if="isSearch==true" type="primary" style="margin-left:10px" @click="goBack">返回</el-button></el-col>
         </el-row>
       </el-form-item>
@@ -62,8 +62,8 @@
       style="width: 100%;height: calc(100vh - 142px);overflow-y:scroll"
       class="elTable">
       <el-table-column label="告警时间" prop="warningTime"></el-table-column>
-      <el-table-column label="MAC地址" prop="mac"></el-table-column>
-      <el-table-column label="告警IP" prop="ip"></el-table-column>
+      <el-table-column label="MAC地址" prop="macAddress"></el-table-column>
+      <el-table-column label="告警IP" prop="ipAddress"></el-table-column>
       <el-table-column label="告警描述" prop="warningDetail"></el-table-column>
     </el-table>
     <el-dialog :title="dialogName" :visible.sync="dialogStatusVisible" :modal-append-to-body="false">
@@ -100,15 +100,8 @@
         oldPost: null,
         pageNum: 1,
         currentPage: 1,
-        interpret: {
-          'source': {name:'MAC地址'},
-          'target': {name:'IP地址'},
-          'start_time': {name:'开始时间'},
-          'end_time': {name:'结束时间'}
-        },
         dialogName: '',
         queryData: {
-          interval: '',
           mac: '',
           ip: '',
           start_time: '',
@@ -160,7 +153,6 @@
               this.$message.error('请确保开始时间早于当前时间')
             } else {
               queryWarning(params).then(res=>{
-                console.log(res);
                 this.pageNum = res.data.count;
                 this.tableData = res.data.data;
                 this.isSearch = true;
@@ -186,10 +178,6 @@
         this.getData(this.isSearch?1:0)
       },
       handleDelete(index, row) {},
-      
-      showDetail(row) {
-        console.log(row);
-      },
     }
   }
 </script>

@@ -57,3 +57,10 @@ export function getIPList(business_name) {
     params: {business_name: business_name}
   })
 }
+
+export function deleteItem(mea_id) {
+  return request({
+    url: '/measure/delete_measure',
+    params: { mea_id }
+  })
+}
