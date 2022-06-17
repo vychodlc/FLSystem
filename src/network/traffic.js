@@ -19,3 +19,10 @@ export function rate(params) {
     params
   })
 }
+
+export function delay(params) {
+  return request({
+    url: '/traffic/delay',
+    params
+  })
+}

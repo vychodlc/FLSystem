@@ -4,14 +4,14 @@
       <el-form label-width="150px" size="small">
         <el-form-item label="统计周期">
           <template>
-            <el-radio v-model="filter.cycle" label="1">日统计</el-radio>
-            <el-radio v-model="filter.cycle" label="2">周统计</el-radio>
-            <el-radio v-model="filter.cycle" label="3">月统计</el-radio>
-            <el-radio v-model="filter.cycle" label="4">年统计</el-radio>
+            <el-radio v-model="filter.cycle" label="4">日统计</el-radio>
+            <el-radio v-model="filter.cycle" label="3">周统计</el-radio>
+            <el-radio v-model="filter.cycle" label="2">月统计</el-radio>
+            <el-radio v-model="filter.cycle" label="1">年统计</el-radio>
           </template>
         </el-form-item>
         <el-form-item label="测量业务">
-          <el-select 
+          <el-select
           @change='businessChecked()'
           v-model="filter.business_name" style="width:80%" clearable placeholder="请选择测量业务">
             <el-option
@@ -59,7 +59,7 @@
             type="datetime"
             placeholder="选择日期时间"
             size="small"
-            style="width:100%;">
+            style="width:80%;">
           </el-date-picker>
         </el-form-item>
       </el-form>
@@ -69,7 +69,7 @@
       <div class="chart">
         <el-row :gutter="20">
           <el-col :span="24">
-            <div v-if="hasRes==1" id="echarts" style="width: 50%; margin: 0 auto; height: 42vh;"></div>    
+            <div v-if="hasRes==1" id="echarts" style="width: 50%; margin: 0 auto; height: 42vh;"></div>
             <el-empty v-else-if="hasRes==0" description="查询无果"></el-empty>
           </el-col>
         </el-row>
@@ -81,7 +81,7 @@
 <script>
   import {getForm,getBusinessList,getIPList} from '@/network/active_test.js'
   export default {
-    name: "Form",
+    name: "FormVue",
     data () {
       return {
         isSearch: false,
@@ -113,11 +113,11 @@
           getIPList(this.filter.business_name).then(res=>{
             this.cpe_ip_list = res.data.cpe_ips;
             this.business_ser_ip_list = res.data.business_ser_ips;
-            
+
             this.filter.cpe_ip = this.cpe_ip_list[0];
             this.filter.business_ser_ip = this.business_ser_ip_list[0];
           })
-        }        
+        }
       },
       goSearch() {
         if(this.filter.cycle=='') {
@@ -139,7 +139,8 @@
             let series = [];
             let resData = res.data.result;
             let resCount = res.data.count;
-            if(resCount==0) {     
+            console.log(res.data);
+            if(resCount==0) {
               this.hasRes = 0;
             } else {
               this.hasRes = 1;
@@ -192,9 +193,9 @@
                 if(document.getElementById('echarts')!=null) {
                   document.getElementById('echarts').removeAttribute("_echarts_instance_");
                   this.$echarts.init(document.getElementById('echarts')).setOption(option);
-                } 
+                }
               })
-            }          
+            }
           this.loading = false;
           }).catch(e=>{
             console.log(e);

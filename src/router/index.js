@@ -46,6 +46,7 @@ const routes = [
           { path: '/', redirect: 'traffic' },
           { path: 'traffic', name: 'Traffic', component: () => import('../views/passive_test/traffic.vue') },
           { path: 'monitor', name: 'Monitor', component: () => import('../views/passive_test/monitor.vue') },
+          { path: 'pressure', name: 'Pressure', component: () => import('../views/passive_test/pressure.vue') },
         ]
       },
       {

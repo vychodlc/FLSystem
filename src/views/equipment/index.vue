@@ -5,7 +5,7 @@
 </template>
 <script>
 export default({
-  name: '',
+  name: 'EquipmentVue',
   data() {
     return {
 

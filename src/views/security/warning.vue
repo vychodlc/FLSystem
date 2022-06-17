@@ -5,7 +5,7 @@
         <el-row>
           <el-col :span="1" style="text-align:center">MAC地址</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.mac" clearable placeholder="请选择">
               <el-option
@@ -18,7 +18,7 @@
           </el-col>
           <el-col :span="1" style="text-align:center">IP地址</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.ip" clearable placeholder="请选择">
               <el-option
@@ -84,7 +84,7 @@
 <script>
   import { getWarningList, queryWarning, wariningDropList } from '@/network/security.js'
   export default {
-    name: "Post",
+    name: "vueLC",
     data () {
       return {
         search: null,
@@ -129,7 +129,7 @@
       getData(method) {
         if(method == 0) {
           getWarningList(this.currentPage).then(res=>{
-            console.log(res);
+            // console.log(res);
             this.pageNum = res.data.count;
             this.tableData = res.data.data;
             this.loading = false;
@@ -176,8 +176,7 @@
       handleCurrentChange() {
         this.loading = true;
         this.getData(this.isSearch?1:0)
-      },
-      handleDelete(index, row) {},
+      }
     }
   }
 </script>

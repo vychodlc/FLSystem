@@ -20,7 +20,7 @@
 <script>
 import {overview} from '@/network/traffic.js'
 export default({
-  name: '',
+  name: 'TrafficVue',
   data() {
     return {
       loading: true,

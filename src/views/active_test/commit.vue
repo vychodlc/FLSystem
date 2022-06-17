@@ -11,7 +11,7 @@
           </template>
         </el-form-item>
         <el-form-item label="测量业务">
-          <el-select 
+          <el-select
           @change='businessChecked()'
           v-model="inputInfo.business_name" style="width:80%" clearable placeholder="请选择测量业务">
             <el-option
@@ -49,10 +49,10 @@
           <template>
             <el-row>
               <el-col :span="4"><el-input v-model="inputInfo.interval" size="medium"></el-input></el-col>
-              <el-col :span="2" :offset="1"><el-radio v-model="inputInfo.interval" label="0">立即</el-radio></el-col>
+              <el-col :span="2" :offset="1"><el-radio v-model="inputInfo.interval" label="10">立即</el-radio></el-col>
               <el-col :span="2"><el-radio v-model="inputInfo.interval" label="300">5分钟</el-radio></el-col>
               <el-col :span="2"><el-radio v-model="inputInfo.interval" label="600">10分钟</el-radio></el-col>
-            </el-row>            
+            </el-row>
           </template>
         </el-form-item>
       </el-form>
@@ -100,7 +100,7 @@
   import {sendTask,getBusinessList,getIPList} from '@/network/active_test.js'
   var XLSX = require("xlsx");
   export default {
-    name: "Input",
+    name: "InputVue",
     data () {
       return {
         search: '',
@@ -132,11 +132,11 @@
           getIPList(this.inputInfo.business_name).then(res=>{
             this.cpe_ip_list = res.data.cpe_ips;
             this.business_ser_ip_list = res.data.business_ser_ips;
-            
+
             this.inputInfo.cpe_ip = this.cpe_ip_list[0];
             this.inputInfo.business_ser_ip = this.business_ser_ip_list[0];
           })
-        }        
+        }
       },
       goAdd() {
         if(this.inputInfo.measure_type=='') {

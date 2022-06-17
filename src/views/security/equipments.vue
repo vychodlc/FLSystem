@@ -5,7 +5,7 @@
         <el-row>
           <el-col :span="1" style="text-align:center">MAC地址</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.mac" clearable placeholder="请选择">
               <el-option
@@ -18,7 +18,7 @@
           </el-col>
           <el-col :span="1" style="text-align:center">IP地址</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.ip" clearable placeholder="请选择">
               <el-option
@@ -101,7 +101,7 @@
 <script>
   import { getDeviceList,queryDevice,block,deviceDropList } from '@/network/security.js'
   export default {
-    name: "Post",
+    name: "vueLC",
     data () {
       return {
         search: null,
@@ -148,7 +148,10 @@
           getDeviceList(this.currentPage).then(res=>{
             this.pageNum = res.data.count;
             this.tableData = res.data.data;
-            this.tableData.map(item => item.blockStatus=='ACCEPT');
+            this.tableData.forEach((item,index)=>{
+              this.tableData[index].blockStatus = item.blockStatus=='DROP';
+            });
+            console.log(this.tableData);
             this.loading = false;
           }).catch(e=>{
             console.log(e);
@@ -171,6 +174,9 @@
               queryDevice(params).then(res=>{
                 this.pageNum = res.data.count;
                 this.tableData = res.data.data;
+                this.tableData.forEach((item,index)=>{
+                  this.tableData[index].blockStatus = item.blockStatus=='DROP';
+                });
                 this.isSearch = true;
                 this.loading = false;
               }).catch(e=>{
@@ -199,7 +205,6 @@
         this.loading = true;
         this.getData(this.isSearch?1:0)
       },
-      handleDelete(index, row) {},
       blockChange(row) {
         this.loading = true;
         let params = {
@@ -207,16 +212,28 @@
           mac: row.macAddress,
           block_action: row.blockStatus?'DROP':'ACCEPT',
         };
+        console.log("当前状态：",row.blockStatus,params.block_action);
         let oldStatus = row.blockStatus;
         block(params).then(res=>{
           let status = res.data.request_status;
           let text1 = row.blockStatus?'阻隔':'连通';
-          let text2 = res.data.block_status=='ACCEPT'?'连通':'阻隔';
-          let text3 = res.data.request_status=='0'?'不好意思阻隔失败咯！':'恭喜你！阻隔成功啦！';
+          console.log("改变后状态：",res.data.block_status);
+          let text2 = '';
+          let text3 = '';
+          if(res.data.block_status=='ACCEPT'){
+            text2 = '连通';
+            text3 = res.data.request_status=='0'?'连通失败！':'连通成功！';
+          }
+          else{
+            text2 = '阻隔';
+            text3 = res.data.request_status=='0'?'阻隔失败！':'阻隔成功！';
+          }
+          // let text2 = res.data.block_status=='ACCEPT'?'连通':'阻隔';
+          // let text3 = res.data.request_status=='0'?'不好意思阻隔失败咯！':'恭喜你！阻隔成功啦！';
           this.loading = false;
           this.$alert(
             '用户请求修改为：'+text1+' <br/>'+'当前阻隔状态：'+text2+' <br/>'+'详情：'+text3+' <br/>',
-            '阻隔切换结果', 
+            '阻隔切换结果',
             {confirmButtonText: '确定', dangerouslyUseHTMLString: true}
           );
           row.blockStatus = status=='0'?(!oldStatus):(oldStatus);

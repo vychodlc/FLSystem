@@ -11,6 +11,7 @@
         >
           <el-menu-item index="/home/passive_test/traffic"><i class="el-icon-menu"></i>流量透视</el-menu-item>
           <el-menu-item index="/home/passive_test/monitor"><i class="el-icon-menu"></i>性能监控</el-menu-item>
+          <el-menu-item index="/home/passive_test/pressure"><i class="el-icon-menu"></i>压力测试</el-menu-item>
         </el-menu>
       </el-aside>
       <el-main style="background-color: #fff;">
@@ -21,7 +22,7 @@
 </template>
 <script>
 export default ({
-  name: '',
+  name: 'PassiveTest',
   data() {
     return {
 

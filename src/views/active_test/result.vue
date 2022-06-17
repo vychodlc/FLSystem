@@ -5,7 +5,7 @@
         <el-row>
           <el-col :span="1" style="text-align:center">源探针</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.cpe_ip" clearable placeholder="请选择">
               <el-option
@@ -18,7 +18,7 @@
           </el-col>
           <el-col :span="1" style="text-align:center">目的地址</el-col>
           <el-col :span="2">
-            <el-select 
+            <el-select
             size="mini"
             v-model="queryData.ser_ip" clearable placeholder="请选择">
               <el-option
@@ -108,12 +108,12 @@
           </el-col>
         </el-row>
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :span="24">
             <div id="echarts_1_line_1" style="width: 100%; height: 20vh;"></div>
           </el-col>
-          <el-col :span="12">
-            <div id="echarts_1_line_2" style="width: 100%; height: 20vh;"></div>
-          </el-col>
+<!--          <el-col :span="2">-->
+<!--            <div style="width: 100%; height: 20vh;"></div>-->
+<!--          </el-col>-->
         </el-row>
       </div>
       <div v-if="dialogName=='流量测量'">
@@ -169,7 +169,7 @@
 <script>
   import { getList,getFilterList,getDetail,getIPList,deleteItem } from '@/network/active_test.js'
   export default {
-    name: "Post",
+    name: "ResultVue",
     data () {
       return {
         search: null,
@@ -257,7 +257,7 @@
                 this.isSearch = true;
                 this.tableData.map(item=>{
                   let d = new Date(item.time);
-                  item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')  
+                  item.time = d.toISOString().replace('T', ' ').replace('.000Z', '')
                 });
                 this.loading = false;
               }).catch(e=>{
@@ -283,7 +283,7 @@
         this.isSearch = false;
         this.search = '';
       },
-      handleCurrentChange() {      
+      handleCurrentChange() {
         this.loading = true;
         this.getData(this.isSearch?1:0)
       },
@@ -308,10 +308,10 @@
           this.$message({
             type: 'info',
             message: '已取消删除'
-          });          
+          });
         });
       },
-      
+
       showDetail(row) {
         getDetail(row.mea_id).then(res=>{
           this.dialogStatusVisible = true;
@@ -323,21 +323,21 @@
             })
           } else if(row.mea_type=='traffic') {
             this.dialogName = '流量测量';
-            this.$nextTick(() => {        
+            this.$nextTick(() => {
               this.showChart2(res.data);
             })
           } else if(row.mea_type=='jitter') {
             this.dialogName = '抖动测量';
-            this.$nextTick(() => {        
+            this.$nextTick(() => {
               this.showChart3(res.data);
             })
           } else if(row.mea_type=='bandwidth') {
             this.dialogName = '带宽测量';
-            this.$nextTick(() => {        
+            this.$nextTick(() => {
               this.showChart4(res.data);
             })
           }
-        })        
+        })
       },
 
       showChart1(chartData) {
@@ -388,7 +388,7 @@
             },
             {
               type: "pie",
-              silent: true, 
+              silent: true,
               radius: ["75%", "90%"],
               center: ["50%", "50%"],
               itemStyle: { normal: { color: colorList[2] }},
@@ -418,7 +418,7 @@
           series: [
             {
               type: "pie",
-              silent: true, 
+              silent: true,
               radius: ["60%", "90%"],
               center: ["50%", "50%"],
               label: {normal: {show: false}},
@@ -479,7 +479,7 @@
           series: [
             {
               type: "pie",
-              silent: true, 
+              silent: true,
               radius: ["60%", "90%"],
               center: ["50%", "50%"],
               label: {normal: {show: false}},
@@ -539,8 +539,8 @@
           }],
           series: [{
             type: 'liquidFill',
-            silent: true, 
-            animationDuration: 1000,   
+            silent: true,
+            animationDuration: 1000,
             color: ['#12bffe'],
             data: [value_shake],
             waveAnimation: false,
@@ -580,27 +580,27 @@
             },
           }],
         }
-        let option_pie = {
-          series: [
-            {
-              name: 'Access From',
-              type: 'pie',
-              radius: '100%',
-              label: {
-                show: false,
-              },
-              data: [
-                { value: 1048, name: 'Search Engine' },
-                { value: 735, name: 'Direct' },
-                { value: 580, name: 'Email' },
-                { value: 484, name: 'Union Ads' },
-                { value: 300, name: 'Video Ads' }
-              ],
-            }
-          ]
-        };
+        // let option_pie = {
+        //   series: [
+        //     {
+        //       name: 'Access From',
+        //       type: 'pie',
+        //       radius: '100%',
+        //       label: {
+        //         show: false,
+        //       },
+        //       data: [
+        //         { value: 1048, name: 'Search Engine' },
+        //         { value: 735, name: 'Direct' },
+        //         { value: 580, name: 'Email' },
+        //         { value: 484, name: 'Union Ads' },
+        //         { value: 300, name: 'Video Ads' }
+        //       ],
+        //     }
+        //   ]
+        // };
         let data1 = [chartData.max_delay, chartData.min_delay, chartData.avg_delay];
-        let data2 = ['200', '100', '111'];
+        // let data2 = ['200', '100', '111'];
         let className = ['MAX', 'MIN', 'AVG'];
         let colorBar = ['#34accf', '#3188fd', '#12288e'];
         let option_bar = {
@@ -614,7 +614,7 @@
             xAxis: {
                 show: false,
                 type: 'value',
-                max: chartData.max_delay*1.002,
+                max: chartData.max_delay*1.05,
                 min: chartData.min_delay*0.999,
             },
             yAxis: [{
@@ -639,7 +639,7 @@
             }],
             series: [{
               name: '探针测试值',
-              silent: true, 
+              silent: true,
               type: 'bar',
               zlevel: 1,
               itemStyle: {
@@ -804,13 +804,13 @@
           option.series[0].data = data1;
           this.clearChart();
           this.$echarts.init(document.getElementById('echarts_2_line_1')).setOption(option);
-        } 
+        }
         if(document.getElementById('echarts_2_line_2')!=null) {
           option.title.text = '出境流量';
           option.series[0].data = data2;
           this.clearChart();
           this.$echarts.init(document.getElementById('echarts_2_line_2')).setOption(option);
-        } 
+        }
       },
       showChart3(chartData) {
         let colorList = [];
@@ -860,7 +860,7 @@
             },
             {
               type: "pie",
-              silent: true, 
+              silent: true,
               radius: ["75%", "90%"],
               center: ["50%", "50%"],
               itemStyle: { normal: { color: colorList[2] }},
@@ -889,8 +889,8 @@
           }],
           series: [{
             type: 'liquidFill',
-            silent: true, 
-            animationDuration: 1000,   
+            silent: true,
+            animationDuration: 1000,
             color: ['#12bffe'],
             data: [value_shake],
             waveAnimation: false,
@@ -968,7 +968,7 @@
         if(document.getElementById('echarts_4_pie_1')!=null) {
           this.clearChart();
           this.$echarts.init(document.getElementById('echarts_4_pie_1')).setOption(option);
-        } 
+        }
       },
       clearChart() {
         let chartList = [

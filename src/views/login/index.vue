@@ -119,7 +119,7 @@
 
 <script>
 export default {
-  name: "Login",
+  name: "LoginVue",
   data () {
     return {
       isLogin: true,
