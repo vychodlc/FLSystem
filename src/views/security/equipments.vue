@@ -3,7 +3,7 @@
     <el-form style="height: 30px;line-height:30px">
       <el-form-item>
         <el-row>
-          <el-col :span="1" style="text-align:center">MAC地址</el-col>
+          <el-col :span="2" style="text-align:center">MAC地址</el-col>
           <el-col :span="2">
             <el-select
             size="mini"

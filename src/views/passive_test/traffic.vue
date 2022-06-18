@@ -10,11 +10,11 @@
         <div id="echarts_bar" style="width: 100%; height: 36vh;margin-bottom:5vh"></div>
       </el-col>
     </el-row>
-    <el-row>
+    <!-- <el-row>
       <el-col :span="12" :offset="11">
         <el-button type="primary" @click="refreshBtn" :disabled="disable">{{btnText}}</el-button>
       </el-col>
-    </el-row>
+    </el-row> -->
   </div>
 </template>
 <script>
@@ -28,10 +28,15 @@ export default({
       cooling: 5,
       disable: false,
       btnText: '刷新',
+      loadTimes: 0,
+      chart1: null,
+      chart2: null,
     };
   },
   mounted() {
-    this.getData();
+    setInterval(() => {
+      this.getData();      
+    }, 2000);
   },
   methods: {
     getData() {
@@ -57,6 +62,7 @@ export default({
     },
     showChart(data_traffic,data_business) {
       let option_line = {
+        animation: false,
         title: {
           text: '流量概况'
         },
@@ -87,6 +93,7 @@ export default({
         ]
       };
       let option_bar = {
+        animation: false,
         title: {
           text: '业务分析 (Top10)'
         },
@@ -115,12 +122,18 @@ export default({
         ]
       };
       if(document.getElementById('echarts_line')!=null) {
-        this.clearChart();
-        this.$echarts.init(document.getElementById('echarts_line')).setOption(option_line);
+        if(this.chart1==null) {
+          this.clearChart();
+          this.chart1 = this.$echarts.init(document.getElementById('echarts_line'))
+        }
+        this.chart1.setOption(option_line);
       }
       if(document.getElementById('echarts_bar')!=null) {
-        this.clearChart();
-        this.$echarts.init(document.getElementById('echarts_bar')).setOption(option_bar);
+        if(this.chart2==null) {
+          this.clearChart();
+          this.chart2 = this.$echarts.init(document.getElementById('echarts_bar'))
+        }
+        this.chart2.setOption(option_bar);
       }
     },
     clearChart() {
