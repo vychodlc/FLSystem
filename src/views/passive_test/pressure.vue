@@ -180,13 +180,15 @@
             }
           },
           grid: {
-            top: '14%'
+            top: '16%'
           },
           xAxis: {
+            name: '时延/ms',
             type: 'category',
             data: xlist
           },
           yAxis: {
+            name: '带宽/Mbps',
             type: 'value'
           },
           series: series

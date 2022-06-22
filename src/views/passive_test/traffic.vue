@@ -77,10 +77,12 @@ export default({
         },
         xAxis: {
           type: 'category',
+          name: '时间',
           boundaryGap: false,
           data: data_traffic[0]
         },
         yAxis: {
+          name: '数据量/MB',
           type: 'value'
         },
         series: [
@@ -101,6 +103,7 @@ export default({
           trigger: 'axis'
         },
         xAxis: {
+          name: '业务类型',
           type: 'category',
           data: data_business[0]
         },
@@ -111,6 +114,7 @@ export default({
           containLabel: true
         },
         yAxis: {
+          name: '数据量/MB',
           type: 'value',
           max: 600,
         },

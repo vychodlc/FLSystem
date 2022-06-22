@@ -68,9 +68,9 @@
       <el-table-column label="优先级" prop="prio"></el-table-column>
       <el-table-column label="源地址" prop="source"></el-table-column>
       <el-table-column label="目的地址" prop="dest"></el-table-column>
-      <el-table-column label="流量" prop="data_flow"></el-table-column>
-      <el-table-column label="总流量" prop="business_flow"></el-table-column>
-      <el-table-column label="平均时延" prop="avg_delay"></el-table-column>
+      <el-table-column label="流量/MB" prop="data_flow"></el-table-column>
+      <el-table-column label="总流量/MB" prop="business_flow"></el-table-column>
+      <el-table-column label="平均时延/ms" prop="avg_delay"></el-table-column>
       <el-table-column label="速率趋势图" align="right">
         <template slot-scope="scope">
           <el-button
@@ -132,6 +132,7 @@ import { performance,rate } from '@/network/traffic.js'
       }
     },
     mounted() {
+      this.formatDate(new Date().getTime())
       this.currentPage = 1;
       this.loading = true;
 
@@ -142,6 +143,7 @@ import { performance,rate } from '@/network/traffic.js'
         this.getData(0);
         // this.showChart1();
       })
+
     },
     methods:{
       getData(method) {
@@ -213,7 +215,6 @@ import { performance,rate } from '@/network/traffic.js'
         //   src_ip: '192.168.0.111',
         //   dst_ip: '192.168.123.51',
         // }
-        console.log("params",params);
         rate(params).then(res=>{
           this.dialogStatusVisible = true;
           this.$nextTick(() => {
@@ -222,23 +223,27 @@ import { performance,rate } from '@/network/traffic.js'
           })
         })
       },
-
       showChart1(chartData) {
-        console.log("chartData",chartData);
         let dataX = [];
         let dataY = [];
-        chartData.map(function (value){
-          dataX.push(value[0]);
+        chartData.map((value)=>{
+          dataX.push(this.formatDate(new Date(value[0]).getTime()))
           dataY.push(value[1]);
         });
-        console.log("dataX",dataX);
-        console.log("dataY",dataY);
         let option = {
+          grid: {
+            top: '15%',
+            left: '10%',
+            right: '10%',
+            bottom: '10%',
+          },
           xAxis: {
+            name: '时间',
             type: 'category',
             data: dataX,
           },
           yAxis: {
+            name: '速率/Mbps',
             type: 'value'
           },
           series: [
@@ -251,7 +256,23 @@ import { performance,rate } from '@/network/traffic.js'
         if(document.getElementById('echarts_box')!=null) {
           this.$echarts.init(document.getElementById('echarts_box')).setOption(option);
         }
-      }
+      },
+      formatDate(time){
+        var date = new Date(time);
+        var year = date.getFullYear(),
+          month = date.getMonth() + 1,//月份是从0开始的
+          day = date.getDate(),
+          hour = date.getHours(),
+          min = date.getMinutes(),
+          sec = date.getSeconds();
+        var newTime = year.toString().slice(2) + '/' +
+              month + '/' +
+              day + ' ' +
+              hour + ':' +
+              min + ':' +
+              sec;
+        return newTime;
+      },
     }
   }
 </script>
