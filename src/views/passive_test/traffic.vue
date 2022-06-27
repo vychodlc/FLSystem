@@ -2,12 +2,15 @@
   <div v-loading='loading'>
     <el-row :gutter="20">
       <el-col :span="24">
-        <div id="echarts_line" style="width: 100%; height: 36vh;margin-bottom:5vh"></div>
+        <div id="echarts_line" style="width: 100%; height: 40vh;margin-bottom:5vh"></div>
       </el-col>
     </el-row>
     <el-row :gutter="20">
-      <el-col :span="24">
-        <div id="echarts_bar" style="width: 100%; height: 36vh;margin-bottom:5vh"></div>
+      <el-col :span="12">
+        <div id="echarts_bar" style="width: 100%; height: 40vh;"></div>
+      </el-col>
+      <el-col :span="12">
+        <div id="echarts_bar2" style="width: 100%; height: 40vh;"></div>
       </el-col>
     </el-row>
     <!-- <el-row>
@@ -53,14 +56,19 @@ export default({
             data_business[0].push(item[0]);
             data_business[1].push(item[1]);
           })
-          this.showChart(data_traffic,data_business);
+          let data_delay = [[],[]];
+          res.data.delay.map(item=>{
+            data_delay[0].push(item[0]);
+            data_delay[1].push(item[1]);
+          })
+          this.showChart(data_traffic,data_business,data_delay);
           this.loading = false;
         }
       }).catch(e=>{
         console.log(e);
       })
     },
-    showChart(data_traffic,data_business) {
+    showChart(data_traffic,data_business,data_delay) {
       let option_line = {
         animation: false,
         title: {
@@ -87,7 +95,7 @@ export default({
         },
         series: [
           {
-            name: 'Email',
+            name: '数据量',
             type: 'line',
             stack: 'Total',
             data: data_traffic[1]
@@ -97,7 +105,7 @@ export default({
       let option_bar = {
         animation: false,
         title: {
-          text: '业务分析 (Top10)'
+          text: '业务分析'
         },
         tooltip: {
           trigger: 'axis'
@@ -108,20 +116,85 @@ export default({
           data: data_business[0]
         },
         grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
+          left: '0%',
+          right: '10%',
+          bottom: '10%',
         },
         yAxis: {
           name: '数据量/MB',
           type: 'value',
-          max: 600,
+          max: Math.max.apply(Math,data_business[1]),
+          show: false,
         },
         series: [
           {
+            name: '数据量',
             data: data_business[1],
-            type: 'bar'
+            type: 'bar',
+            itemStyle: {
+              normal: {
+                label: {
+                  formatter: (params) => {
+                    return params.value==0?0:params.value+" MB"
+                  },
+                  show: true,
+                  position: "top",
+                  textStyle: {
+                    fontWeight: "bolder",
+                    fontSize: "12",
+                    color: "#000"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      };
+      let option_bar2 = {
+        animation: false,
+        title: {
+          text: '时延分析'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          name: '业务类型',
+          type: 'category',
+          data: data_delay[0]
+        },
+        grid: {
+          left: '0%',
+          right: '10%',
+          bottom: '10%',
+        },
+        yAxis: {
+          name: '时延/ms',
+          type: 'value',
+          max: Math.max.apply(Math,data_delay[1]),
+          show: false
+        },
+        series: [
+          {
+            name: '时延',
+            data: data_delay[1],
+            type: 'bar',
+            itemStyle: {
+              normal: {
+                label: {
+                  formatter: (params) => {
+                    return params.value==0?0:params.value.toFixed(8)+" ms"
+                  },
+                  show: true,
+                  position: "top",
+                  textStyle: {
+                    fontWeight: "bolder",
+                    fontSize: "12",
+                    color: "#000"
+                  }
+                }
+              }
+            }
           }
         ]
       };
@@ -139,9 +212,16 @@ export default({
         }
         this.chart2.setOption(option_bar);
       }
+      if(document.getElementById('echarts_bar2')!=null) {
+        if(this.chart3==null) {
+          this.clearChart();
+          this.chart3 = this.$echarts.init(document.getElementById('echarts_bar2'))
+        }
+        this.chart3.setOption(option_bar2);
+      }
     },
     clearChart() {
-      let chartList = ['echarts_line','echarts_bar']
+      let chartList = ['echarts_line','echarts_bar','echarts_bar2']
       for(let i=0; i<chartList.length; i++) {
         if(document.getElementById(chartList[i])!=null) {
           document.getElementById(chartList[i]).removeAttribute("_echarts_instance_");
